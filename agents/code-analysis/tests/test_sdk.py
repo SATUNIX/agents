@@ -5,10 +5,14 @@ from __future__ import annotations
 from agent import runtime
 from agent.app_agent import build_agent
 from agent.sdk_imports import Agent
+from agent.policies import PolicyManager
+from agent.state import StateManager
 
 
-def test_build_agent_returns_agent(agent_config):
-    agent = build_agent(agent_config)
+def test_build_agent_returns_agent(agent_config, tmp_path):
+    policies = PolicyManager(agent_config.policy_dir)
+    state = StateManager(tmp_path / "state", policy_manager=policies)
+    agent = build_agent(agent_config, policies, state)
     assert isinstance(agent, Agent)
     assert agent.name == "code-analysis-agent"
     assert agent.tools  # includes workspace_status + hosted MCP entries (if any)

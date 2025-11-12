@@ -62,3 +62,9 @@ tests\conftest.py:10: in <module>
     from agent.config import AgentConfig
 E   ModuleNotFoundError: No module named 'agent'
 (.venv) PS I:\AI\agents\agents\code-analysis>
+
+Also: to rename repo to avoid conflict
+Fix import of local modules for tests (rename agent folder to something different)
+Open AI Agent library = agents
+Repo = agent-collections
+src/agents to = main

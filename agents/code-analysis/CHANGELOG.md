@@ -8,3 +8,4 @@
 - Stage 15: Expanded pytest/CI coverage (runtime, MCP, dashboard, SDK) plus nightly chaos smoke workflow; coverage artifact uploaded from CI.
 - Stage 16: Documentation portal refreshed (tool execution demo, runbooks, release checklist, GA readiness updates) and release checklist referencing tool registry/MCP health snapshots.
 - Stage 1–2: Replaced bespoke LLM/orchestration layers with `openai.agents.Agent` + `Runner`, simplified `AgentConfig`, updated CLI/runtime, and published the SDK compliance snapshot.
+- Stage 3–4: Converted local tooling to SDK `@function_tool` definitions, wired Hosted MCP tools via `HostedMCPTool`, streamlined telemetry/guardrails inside each tool, and removed the legacy registry/invoker stack.

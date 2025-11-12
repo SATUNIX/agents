@@ -79,18 +79,17 @@ Establish robust project hygiene and reproducibility for all environments.
 
 ## Stage 5 – Tooling & MCP Integration Layer
 
-**Status:** ✅ Completed – Local tool registry, MCP bootstrap, and declarative attachments are operational.
+**Status:** ✅ Completed – SDK `@function_tool` set plus Hosted MCP attachments are operational.
 
 **Objectives:**
 
 * Implement Hosted MCP client bootstrap (endpoint discovery, auth, health, rate-limits).
-* Create core local tools: `read_file`, `write_file`, `shell_exec`, `repo_summarize`.
-* Attach tools declaratively in configuration files with role-based access control.
-* Maintain `/state/tools/registry.json` for tool provenance and versioning.
+* Create core local tools via SDK decorators (`workspace_read_file`, `workspace_write_file`, `workspace_shell_exec`, `workspace_repo_summary`).
+* Attach Hosted MCP tools declaratively through `config/settings.yaml` and `HostedMCPTool` definitions.
 
 **Deliverables:**
 
-* `tools/` module containing JSON Schema contracts for inputs/outputs.
+* `src/agent/function_tools.py` and Hosted MCP tool bindings in `app_agent.py`.
 * Health-checked hosted MCP integrations.
 
 ---
@@ -108,8 +107,8 @@ Establish robust project hygiene and reproducibility for all environments.
 
 **Deliverables:**
 
-* `guardrails.py` module with validators.
-* Policy-driven denial tests.
+* Policy-driven tool guardrails embedded in `@function_tool` definitions.
+* Tests covering allowed/blocked paths and command allowlists.
 
 ---
 
@@ -218,9 +217,9 @@ Status [ ]
 
 **Deliverables:**
 
-* Updated `AgentsGateway` with tool event handling, retry logic, and structured observation logging.
-* Guardrail library that enforces declarative policy rules plus test coverage for accept/reject paths.
-* Regression demo (`docs/guides/tool-execution-demo.md`, `scripts/demo_tool_run.py`) showing executor edits and reviewer validation.
+* `src/agent/function_tools.py` providing SDK `@function_tool` implementations for read/write/shell/repo summary, with inline guardrails + telemetry.
+* Hosted MCP tools declared via `HostedMCPTool` in `src/agent/app_agent.py`; no custom `ToolRegistry`/`ToolInvoker` remains.
+* Updated documentation/demo showing tool-backed execution via SDK primitives.
 
 ---
 
@@ -237,9 +236,9 @@ Status [ ]
 
 **Deliverables:**
 
-* Compatibility matrix (`docs/reports/compatibility-matrix.md`) + `scripts/smoke_test.py` smoke script for both modes.
-* Updated configuration docs/runbooks describing new env flags and local-development path defaults.
-* Guardrail unit tests covering command parsing, network gating, and workspace path validation failures.
+* Compatibility matrix (`docs/reports/compatibility-matrix.md`) + `scripts/smoke_test.py` script validating Responses vs chat fallback.
+* Updated configuration docs/runbooks describing new env flags, `@function_tool` workflows, and policy toggles.
+* Test suite covering runtime, SDK builder, MCP health, and function-tool guardrails.
 
 ---
 
