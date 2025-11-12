@@ -1,0 +1,35 @@
+
+services:
+  dev-agent:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: code-analysis-agent:dev
+    container_name: dev-agent
+    restart: unless-stopped
+    environment:
+      OPENAI_API_KEY: "sk-fake"
+      OPENAI_BASE_URL: "http://host.docker.internal:1234/v1"
+      AGENT_MODEL: "gpt-4o-mini"
+      AGENT_WORKSPACE: /workspace
+      AGENT_STATE_DIR: /state
+      AGENT_TOOLS_DIR: /tools
+      ALLOW_NET: "true"
+      AGENT_START_GOAL: "Describe workspace status"
+    volumes:
+      - ./projects/demo:/workspace
+      - agent_state:/state
+      - agent_tools:/tools
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    healthcheck:
+      test: ["CMD-SHELL", "python -m agent --help > /dev/null 2>&1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    ports:
+      - "7081:7081"
+
+volumes:
+  agent_state:
+  agent_tools:
