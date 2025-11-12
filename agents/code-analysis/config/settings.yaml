@@ -1,0 +1,66 @@
+models:
+  gpt-4o-mini:
+    provider: lm-studio
+    temperature: 0.1
+    max_tokens: 400
+
+tools:
+  workspace.read:
+    type: filesystem_read
+    description: Read-only access to repository files
+    allowed_globs:
+      - "**/*.md"
+      - "**/*.py"
+      - "**/*.txt"
+    denied_globs:
+      - "**/.git/**"
+  workspace.write:
+    type: filesystem_write
+    description: Write access constrained to source/docs files
+    allowed_globs:
+      - "src/**/*.py"
+      - "*.md"
+      - "docs/**/*.md"
+    denied_globs:
+      - "**/.git/**"
+
+policies:
+  safety.default:
+    description: Guard against workspace escapes and destructive edits
+    rules:
+      - "Never touch files outside the mounted /workspace directory."
+      - "Prefer reversible edits and checkpoint before destructive changes."
+  review.default:
+    description: Ensure reviewer validates every executor action
+    rules:
+      - "Require explicit validation notes for each completed step."
+  workspace.write-guard:
+    description: Executor must justify every write operation
+    rules:
+      - "Executor must describe targeted files before editing."
+      - "Reviewer must confirm diffs before completion."
+
+agents:
+  planner:
+    description: Decompose goals and produce task DAGs
+    model: gpt-4o-mini
+    tools:
+      - workspace.read
+    policies:
+      - safety.default
+  executor:
+    description: Execute plan steps using approved tools
+    model: gpt-4o-mini
+    tools:
+      - workspace.read
+      - workspace.write
+    policies:
+      - safety.default
+      - workspace.write-guard
+  reviewer:
+    description: Validate outputs and enforce policies
+    model: gpt-4o-mini
+    tools:
+      - workspace.read
+    policies:
+      - review.default

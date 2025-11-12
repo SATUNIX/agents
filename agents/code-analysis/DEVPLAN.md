@@ -39,11 +39,11 @@ Establish robust project hygiene and reproducibility for all environments.
 * Verified build/run cycle via `docker compose up -d`.
 * `docker compose logs -f` shows healthy agent startup.
 
-Status [ ]
-
 ---
 
 ## Stage 3 – Configuration & Secrets Hub
+
+**Status:** ✅ Completed – Typed config, YAML registry, secrets handling, and CLI tooling are ready.
 
 **Objectives:**
 
@@ -56,8 +56,6 @@ Status [ ]
 
 * `config.py` and `settings.yaml`.
 * CLI command: `python -m agent config view`.
-
-Status [ ]
 
 ---
 

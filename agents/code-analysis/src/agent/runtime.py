@@ -14,6 +14,7 @@ class AgentRuntime:
 
     def __init__(self) -> None:
         config = AgentConfig.load()
+        config.write_snapshot()
         state = StateManager(config.state_dir)
         llm = LLMClient(config)
         context = AgentContext(config=config, state=state, llm=llm)

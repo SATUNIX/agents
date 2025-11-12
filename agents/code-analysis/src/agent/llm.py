@@ -20,7 +20,10 @@ class LLMClient:
             raise RuntimeError(
                 "openai package not available. Install dependencies via `pip install -r requirements.txt`."
             )
-        self._client = OpenAI(api_key=config.openai_api_key, base_url=config.openai_base_url)
+        self._client = OpenAI(
+            api_key=config.openai_api_key.get_secret_value(),
+            base_url=config.openai_base_url,
+        )
         self._model = config.agent_model
 
     def complete(self, prompt: str, **overrides: Any) -> str:

@@ -19,6 +19,8 @@ RUN pip install --no-cache-dir -r /app/requirements.txt
 
 COPY . /app
 
+RUN pip install --no-cache-dir -e .
+
 RUN chown -R agent:agent /app
 
 USER agent
