@@ -68,3 +68,5 @@ Fix import of local modules for tests (rename agent folder to something differen
 Open AI Agent library = agents
 Repo = agent-collections
 src/agents to = main
+
+Todo reminder: re anlyse and review codebase, perform tests, write review report, make a new plan as necessary. 
