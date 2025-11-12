@@ -12,6 +12,7 @@ from pydantic import BaseModel, Field, ValidationError
 
 from ..config import AgentConfig
 from ..guardrails import Guardrails, GuardrailViolation
+from ..policies import PolicyManager
 
 
 class ToolError(RuntimeError):
@@ -21,6 +22,8 @@ class ToolError(RuntimeError):
 @dataclass(slots=True)
 class ToolContext:
     config: AgentConfig
+    guardrails: Guardrails
+    policies: PolicyManager
 
 
 class ToolSchema(BaseModel):
@@ -46,7 +49,6 @@ class LocalTool:
 
     def __init__(self, context: ToolContext) -> None:
         self.context = context
-        self.guardrails = Guardrails(context.config)
 
     def run(self, payload: Dict[str, Any]) -> ToolResult:
         try:
@@ -60,14 +62,14 @@ class LocalTool:
 
     def _within_workspace(self, path: str | Path) -> Path:
         target = Path(path)
-        return self.guardrails.ensure_workspace_path(target)
+        return self.context.guardrails.ensure_workspace_path(target)
 
     def _run_shell(self, command: str, cwd: Path | None = None, timeout: int = 120) -> subprocess.CompletedProcess[str]:
         """Execute a shell command and return the completed process."""
 
         cwd = cwd or self.context.config.workspace
         cmd_list = command.split() if isinstance(command, str) else list(command)
-        self.guardrails.check_command(cmd_list)
+        self.context.guardrails.check_command(cmd_list)
         proc = subprocess.run(
             cmd_list,
             cwd=cwd,

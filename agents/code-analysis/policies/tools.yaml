@@ -1,0 +1,29 @@
+defaults:
+  allowed_commands:
+    - ls
+    - cat
+    - python
+    - pytest
+    - rg
+    - git
+  max_tool_calls: 200
+  max_tokens: 200000
+
+agents:
+  planner:
+    allowed_tools:
+      - workspace.read_file
+      - workspace.repo_summary
+  executor:
+    allowed_tools:
+      - workspace.read_file
+      - workspace.write_file
+      - workspace.shell_exec
+      - workspace.repo_summary
+  reviewer:
+    allowed_tools:
+      - workspace.read_file
+
+budgets:
+  max_tool_calls: 500
+  max_tokens: 500000

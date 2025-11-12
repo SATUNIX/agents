@@ -13,8 +13,8 @@ from agent.tools import (
 )
 
 
-def test_read_write_tools(agent_config) -> None:
-    context = ToolContext(agent_config)
+def test_read_write_tools(agent_config, guardrails, policy_manager) -> None:
+    context = ToolContext(agent_config, guardrails, policy_manager)
     writer = WriteFileTool(context)
     reader = ReadFileTool(context)
 
@@ -23,8 +23,8 @@ def test_read_write_tools(agent_config) -> None:
     assert result.details["content"] == "hi"
 
 
-def test_shell_tool_guardrail(agent_config) -> None:
-    context = ToolContext(agent_config)
+def test_shell_tool_guardrail(agent_config, guardrails, policy_manager) -> None:
+    context = ToolContext(agent_config, guardrails, policy_manager)
     tool = ShellExecTool(context)
     with pytest.raises(ToolError):
         tool.run({"command": ["rm", "-rf", "/tmp"]})

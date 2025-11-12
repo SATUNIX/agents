@@ -9,6 +9,8 @@ from typing import List
 
 from fastapi import FastAPI, HTTPException
 
+from ..policies import PolicyManager
+
 
 STATE_DIR = Path(os.getenv("AGENT_STATE_DIR", "/state")).resolve()
 
@@ -77,6 +79,13 @@ def checkpoint(run_id: str) -> dict:
 @app.get("/mcp")
 def mcp_endpoints() -> dict:
     return _safe_read_json(STATE_DIR / "tools" / "mcp_endpoints.json", {})
+
+
+@app.post("/policies/reload")
+def reload_policies() -> dict:
+    manager = PolicyManager(Path(os.getenv("AGENT_POLICY_DIR", "policies")))
+    manager.send_reload_signal()
+    return {"status": "reloaded"}
 
 
 def run_dashboard(host: str = "0.0.0.0", port: int = 7081) -> None:

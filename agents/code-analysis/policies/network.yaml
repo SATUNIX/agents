@@ -1,0 +1,7 @@
+allow_net: false
+allowed_hosts:
+  - host.docker.internal
+blocked_hosts:
+  - metadata.google.internal
+rate_limits:
+  default_per_minute: 60

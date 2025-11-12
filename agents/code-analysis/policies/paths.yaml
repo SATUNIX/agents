@@ -1,0 +1,8 @@
+allowed_globs:
+  - "**/*.py"
+  - "**/*.md"
+  - "*.yaml"
+blocked_globs:
+  - "**/.git/**"
+  - "**/__pycache__/**"
+  - "**/*.pem"

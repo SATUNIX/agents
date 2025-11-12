@@ -7,6 +7,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional
 
+from .policies import PolicyManager
+
 
 class MetricsRecorder:
     """Accumulates metrics and persists them as JSON."""
@@ -92,7 +94,7 @@ class CheckpointStore:
 class StateManager:
     """Persists JSONL events, metrics, and checkpoints."""
 
-    def __init__(self, state_dir: Path, run_id: str | None = None) -> None:
+    def __init__(self, state_dir: Path, run_id: str | None = None, policy_manager: PolicyManager | None = None) -> None:
         self.state_dir = state_dir
         self.run_id = run_id or datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
         self.audit_dir = self.state_dir / "audit"
@@ -100,6 +102,7 @@ class StateManager:
         self.log_path = self.audit_dir / f"run-{self.run_id}.jsonl"
         self.metrics = MetricsRecorder(self.state_dir / "metrics.json")
         self.checkpoints = CheckpointStore(self.state_dir / "checkpoints", self.run_id)
+        self.policy_manager = policy_manager
 
     def append_event(self, kind: str, payload: Dict[str, Any]) -> None:
         record = {
@@ -133,8 +136,11 @@ class StateManager:
         self.metrics.record_tool(name, duration, success)
 
     def record_tokens(self, actor: str, prompt_tokens: int, completion_tokens: int) -> None:
+        delta = prompt_tokens + completion_tokens
         if prompt_tokens or completion_tokens:
             self.metrics.record_tokens(actor, prompt_tokens, completion_tokens)
+            if self.policy_manager and delta:
+                self.policy_manager.record_tokens(delta)
 
     def record_error(self, kind: str) -> None:
         self.metrics.increment_error(kind)

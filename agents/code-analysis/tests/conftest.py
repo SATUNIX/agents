@@ -8,6 +8,8 @@ from pathlib import Path
 import pytest
 
 from agent.config import AgentConfig
+from agent.policies import PolicyManager
+from agent.guardrails import Guardrails
 
 
 @pytest.fixture()
@@ -55,9 +57,31 @@ agents:
     secrets_file = tmp_path / "secrets.env"
     secrets_file.write_text("LM_TOKEN=abc123", encoding="utf-8")
 
+    policy_dir = tmp_path / "policies"
+    policy_dir.mkdir()
+    (policy_dir / "tools.yaml").write_text(
+        """
+defaults:
+  allowed_commands: [ls, cat, python]
+  max_tool_calls: 10
+budgets:
+  max_tokens: 1000
+agents:
+  executor:
+    allowed_tools: [workspace.read_file, workspace.write_file]
+""",
+        encoding="utf-8",
+    )
+    (policy_dir / "network.yaml").write_text("allow_net: false", encoding="utf-8")
+    (policy_dir / "paths.yaml").write_text(
+        "allowed_globs: ['**/*']\nblocked_globs: []\n",
+        encoding="utf-8",
+    )
+
     monkeypatch.setenv("AGENT_WORKSPACE", str(workspace))
     monkeypatch.setenv("AGENT_STATE_DIR", str(state_dir))
     monkeypatch.setenv("AGENT_TOOLS_DIR", str(tools_dir))
+    monkeypatch.setenv("AGENT_POLICY_DIR", str(policy_dir))
     monkeypatch.setenv("AGENT_SETTINGS_PATH", str(settings))
     monkeypatch.setenv("AGENT_SECRETS_FILE", str(secrets_file))
     monkeypatch.setenv("OPENAI_BASE_URL", "http://test")
@@ -72,3 +96,13 @@ agents:
 @pytest.fixture()
 def agent_config(config_env) -> AgentConfig:
     return AgentConfig.load()
+
+
+@pytest.fixture()
+def policy_manager(agent_config) -> PolicyManager:
+    return PolicyManager(agent_config.policy_dir)
+
+
+@pytest.fixture()
+def guardrails(agent_config, policy_manager) -> Guardrails:
+    return Guardrails(agent_config, policy_manager)

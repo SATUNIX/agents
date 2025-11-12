@@ -151,6 +151,8 @@ Establish robust project hygiene and reproducibility for all environments.
 
 ## Stage 9 – CI/CD & Release Pipeline
 
+**Status:** ✅ Completed – CI lint/test/build and release workflows (with SBOM, scan, signing) are wired up.
+
 **Objectives:**
 
 * Create GitHub Actions (or GitLab CI) workflow for lint → test → build → release.
@@ -163,12 +165,11 @@ Establish robust project hygiene and reproducibility for all environments.
 * `.github/workflows/ci.yml` and `.github/workflows/release.yml`.
 * SBOM and image signatures stored in `/state/release_artifacts/`.
 
-
-Status [ ]
-
 ---
 
 ## Stage 10 – Production Hardening & Documentation
+
+**Status:** ✅ Completed – Docs portal, runbooks, QA gap analysis, and GA readiness report delivered.
 
 **Objectives:**
 
@@ -189,6 +190,8 @@ Status [ ]
 
 ## Optional Stage 11 – Policy-as-Code and Extensions
 
+**Status:** ✅ Completed – YAML policy packs, SIGHUP/REST reloads, and budget enforcement are live.
+
 **Objectives:**
 
 * Implement YAML-based policies for tools, paths, and network rules.
@@ -196,6 +199,102 @@ Status [ ]
 * Extend to include cost-control budgets and per-run token limits.
 
 **Deliverables:**
+
+* `policies/{tools.yaml, network.yaml, paths.yaml}`.
+* Policy validation CLI + SIGHUP/REST reload mechanism.
+* Cost-control enforcement (tool-call + token budgets).
+
+---
+
+## Stage 12 – Tool-Backed Execution & Policy Enforcement
+
+**Status:** 🚧 Planned – Bridges the current reasoning-only executor with the filesystem/tooling expectations in SpecSheet/AGENTS.
+
+**Objectives:**
+
+* Wire Agents SDK tool-calls (function_call / step events) to the local `ToolInvoker`, ensuring planner/executor steps can actually read, write, and shell within `/workspace`.
+* Enforce `allowed_globs` / `denied_globs` from `config/settings.yaml` inside each tool and guardrail, so planner claims and policy text match runtime behavior.
+* Normalize guardrail command allowlists (per-command entries, environment overrides) and surface policy violations back to reviewer checkpoints for retry loops.
+
+**Deliverables:**
+
+* Updated `AgentsGateway` with tool event handling, retry logic, and structured observation logging.
+* Guardrail library that enforces declarative policy rules plus test coverage for accept/reject paths.
+* Regression demo where the executor edits a file using local tools and the reviewer validates the diff.
+
+---
+
+## Stage 13 – Backend Compatibility & Runtime Safety
+
+**Status:** 🚧 Planned – Resolves the LM Studio / Agents SDK mismatch and hard-coded workspace assumptions.
+
+**Objectives:**
+
+* Implement robust feature detection (or config switch) between OpenAI Responses API and chat completions, with graceful fallback when LM Studio lacks Agents endpoints.
+* Harden error handling for backend failures (429/5xx), including exponential backoff and token accounting so checkpoints survive transient outages.
+* Make workspace/state/tools paths configurable without forcing `/workspace` creation on local hosts; add permission checks and helpful diagnostics.
+* Extend command guardrails to support multi-word commands (e.g., `git status`) and provide env-based allowlist overrides for operators.
+
+**Deliverables:**
+
+* Compatibility matrix + automated smoke test proving both LM Studio chat-only and OpenAI Responses modes succeed.
+* Updated configuration docs/runbooks describing new env flags and local-development path defaults.
+* Guardrail unit tests covering command parsing, network gating, and workspace path validation failures.
+
+---
+
+## Stage 14 – MCP Connectivity & Tool Surfacing
+
+**Status:** 🚧 Planned – Converts the MCP placeholder into a functioning integration tier.
+
+**Objectives:**
+
+* Build actual MCP client connections (HTTP, WS, stdio) with auth token resolution, health probes, and rate-limit tracking per endpoint.
+* Surface hosted MCP tools to the planner/executor (via Agents SDK or internal dispatcher) with schema discovery and failure telemetry stored in `/state/audit`.
+* Add observability endpoints / dashboard panels summarizing MCP health, quota usage, and last-invocation metadata.
+
+**Deliverables:**
+
+* `MCPClientManager` capable of connecting, authenticating, and invoking sample endpoints end-to-end.
+* FastAPI dashboard cards plus CLI commands that show MCP health, throttling status, and actionable remediation hints.
+* Integration tests using mocked MCP servers validating connection lifecycle, auth failures, and rate-limit enforcement.
+
+---
+
+## Stage 15 – Verification, Testing, and QA Alignment
+
+**Status:** 🚧 Planned – Aligns real coverage with the GA claims in docs/reports.
+
+**Objectives:**
+
+* Expand pytest suite to cover `AgentRuntime`, orchestration checkpoints, tool execution flows, reviewer verdicts, and dashboard endpoints (FastAPI TestClient).
+* Add deterministic stubs for the Agents SDK / LM Studio so plan→execute→review cycles can be tested without hitting real endpoints.
+* Implement integration + chaos workflows in CI (e.g., nightly job running dockerized agent with induced LM Studio outages, MCP throttling) and report coverage badges.
+* Reconcile docs (`gap-analysis`, `ga-readiness`) with measured results, clearly flagging remaining risks if targets are not yet satisfied.
+
+**Deliverables:**
+
+* CI pipelines that run unit, integration, and chaos suites with artifacts uploaded for inspection.
+* Coverage reports (e.g., `pytest --cov`) published to README/docs plus alerts if thresholds regress.
+* Updated reports/runbooks reflecting true QA status, residual risks, and mitigations tied to this stage.
+
+---
+
+## Stage 16 – Documentation & Release Harmonization
+
+**Status:** 🚧 Planned – Ensures project collateral matches the implemented reality once Stages 12–15 land.
+
+**Objectives:**
+
+* Refresh `SpecSheet.md`, `AGENTS.md`, and docs portal sections to describe the finalized execution model, MCP tooling, guardrails, and compatibility story.
+* Add operator-focused guidance on configuring tool policies, enabling/disabling network access, and troubleshooting Agents-vs-chat fallback behavior.
+* Update release workflows/checklists to include new verification artifacts (tool registry snapshots, MCP health dumps, chaos logs) before tagging GA builds.
+
+**Deliverables:**
+
+* Versioned documentation set (overview, guides, runbooks, reports) that tracks the enhanced stages and links to real evidence.
+* Release checklist template referencing the new verification data and a sign-off rubric for GA readiness.
+* Change log entry summarizing the completion of Stages 12–16 with cross-links to relevant docs/tests.
 
 * `policies/{tools.yaml, network.yaml, paths.yaml}`.
 * Policy validation CLI and reload signal handler.

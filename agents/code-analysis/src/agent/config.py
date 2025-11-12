@@ -83,6 +83,7 @@ class AgentConfig(BaseModel):
     workspace: Path
     state_dir: Path
     tools_dir: Path
+    policy_dir: Path
     allow_net: bool = False
     settings_path: Path
     settings: SettingsRegistry
@@ -90,7 +91,7 @@ class AgentConfig(BaseModel):
 
     @model_validator(mode="after")
     def _ensure_directories(self) -> "AgentConfig":
-        for directory in (self.workspace, self.state_dir, self.tools_dir):
+        for directory in (self.workspace, self.state_dir, self.tools_dir, self.policy_dir):
             directory.mkdir(parents=True, exist_ok=True)
         return self
 
@@ -102,6 +103,7 @@ class AgentConfig(BaseModel):
         workspace = Path(env.get("AGENT_WORKSPACE", "/workspace")).expanduser().resolve()
         state_dir = Path(env.get("AGENT_STATE_DIR", "/state")).expanduser().resolve()
         tools_dir = Path(env.get("AGENT_TOOLS_DIR", "/tools")).expanduser().resolve()
+        policy_dir = Path(env.get("AGENT_POLICY_DIR", "policies")).expanduser().resolve()
         settings_path = Path(env.get("AGENT_SETTINGS_PATH", "config/settings.yaml")).expanduser().resolve()
         settings = SettingsRegistry.from_path(settings_path)
         secrets = cls._load_secrets(env.get("AGENT_SECRETS_FILE"))
@@ -113,6 +115,7 @@ class AgentConfig(BaseModel):
             workspace=workspace,
             state_dir=state_dir,
             tools_dir=tools_dir,
+            policy_dir=policy_dir,
             allow_net=env.get("ALLOW_NET", "false").lower() == "true",
             settings_path=settings_path,
             settings=settings,
@@ -176,6 +179,7 @@ class AgentConfig(BaseModel):
             "workspace": str(self.workspace),
             "state_dir": str(self.state_dir),
             "tools_dir": str(self.tools_dir),
+            "policy_dir": str(self.policy_dir),
             "allow_net": self.allow_net,
             "settings_path": str(self.settings_path),
             "settings": self.settings.model_dump(),

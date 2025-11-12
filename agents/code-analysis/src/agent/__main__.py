@@ -10,17 +10,22 @@ import typer
 from rich.console import Console
 
 from .config import AgentConfig
+from pathlib import Path
+
 from .runtime import AgentRuntime
 from .state import StateManager
 from .observability import run_dashboard
+from .policies import PolicyManager
 
 app = typer.Typer(help="Run the OpenAI Agent SDK skeleton loop")
 config_app = typer.Typer(help="Configuration utilities")
 tools_app = typer.Typer(help="Inspect and invoke local tools")
 checkpoints_app = typer.Typer(help="Checkpoint utilities")
+policies_app = typer.Typer(help="Policy-as-code controls")
 app.add_typer(config_app, name="config")
 app.add_typer(tools_app, name="tools")
 app.add_typer(checkpoints_app, name="checkpoints")
+app.add_typer(policies_app, name="policies")
 
 console = Console()
 
@@ -102,6 +107,20 @@ def dashboard(host: str = "0.0.0.0", port: int = 7081) -> None:
 
     console.print(f"Starting dashboard on http://{host}:{port}")
     run_dashboard(host, port)
+
+
+@policies_app.command("validate")
+def policies_validate(policy_dir: str = typer.Option("policies", help="Policy directory")) -> None:
+    manager = PolicyManager(Path(policy_dir))
+    result = manager.validate()
+    console.print(result)
+
+
+@policies_app.command("reload")
+def policies_reload() -> None:
+    manager = PolicyManager(Path(os.getenv("AGENT_POLICY_DIR", "policies")))
+    manager.send_reload_signal()
+    console.print("[green]Sent SIGHUP to agent runtime[/green]")
 
 
 def main() -> None:  # pragma: no cover - Typer entry point
