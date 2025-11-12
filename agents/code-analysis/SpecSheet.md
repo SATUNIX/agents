@@ -25,8 +25,8 @@ This specification defines a **Docker-deployed OpenAI Agent** built using the **
 
 **Tools:**
 
-* **Hosted MCP tools:** Connected via remote URLs for API, web, or data access.
-* **Local tools:** Installed via the in-container tool manager with isolated directories.
+* **Hosted MCP tools:** Connected via remote URLs for API, web, or data access (declared via `HostedMCPTool`).
+* **Local tools:** Implemented as SDK `@function_tool` callables with workspace guardrails.
 
 **Storage:**
 
@@ -130,8 +130,8 @@ volumes:
 
 ### Tooling System
 
-* **Hosted MCP Tools:** Remote MCP endpoints for API/data integration.
-* **Local Tools:** Installed within `/tools`, invoked via SDK-defined interfaces.
+* **Hosted MCP Tools:** Remote MCP endpoints for API/data integration (declared via `HostedMCPTool`).
+* **Local Tools:** SDK `@function_tool` callables executed within the workspace guardrails.
 
 ### State and Persistence
 

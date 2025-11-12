@@ -23,24 +23,24 @@ Goal: Delete custom orchestration/tooling layers and rebuild the repo around the
   - Deleted files no longer referenced anywhere in the codebase.
 
 ## Epic 3 (Done): Convert Tools to `@function_tool` & `HostedMCPTool`
-- **Tasks**
-  1. Replace `src/agent/tools/*`, `ToolContext`, `ToolRegistry`, and `ToolInvoker` with SDK-decorated functions (`@function_tool`) that perform file read/write, shell exec, repo summary, etc. Guardrails (path jail, command/network allowlists) live inside these functions.
-  2. Model hosted integrations using `HostedMCPTool` definitions that reference the MCP endpoints declared in config. Remove custom MCP invocation plumbing from `MCPClientManager`, or slim it to a health monitor only.
-  3. Update docs/runbooks to describe how to add a new function tool or hosted MCP tool using SDK syntax instead of the custom registry.
+- **Highlights**
+  1. `src/agent/function_tools.py` now exposes the filesystem/shell/repo tools via `@function_tool`, each with inline guardrails + telemetry.
+  2. Hosted integrations are declared through `HostedMCPTool` entries in `src/agent/app_agent.py`; `MCPClientManager` only handles health snapshots.
+  3. Docs/runbooks describe how to add new function tools or hosted MCP definitions using the SDK syntax.
 - **Acceptance Criteria**
-  - Tools are registered by decorating Python callables; there is no `ToolRegistry` or `ToolInvoker` module.
-  - MCP endpoints appear as `HostedMCPTool` instances consumed directly by the SDK.
-  - Documentation references SDK decorators (no mention of `ToolContext` or `ToolRegistry`).
+  - Tools are registered solely via SDK decorators.
+  - Hosted MCP endpoints surface as `HostedMCPTool` instances consumed directly by the SDK.
+  - Documentation references `@function_tool` guidance instead of legacy registries.
 
 ## Epic 4 (Done): Telemetry, Guardrails, and Health Hooks
-- **Tasks**
-  1. Keep `StateManager` (or replace it with a simplified logger) focused on audit trails, metrics, and release artifacts. Hook it into SDK callbacks (`Runner.on_step`, tool decorators) instead of manual logging.
-  2. Retain minimal guardrails (path normalization, command/network allowlists) by importing helper functions inside each `@function_tool`. Remove the global guardrails class if the SDK’s built-in validation suffices.
-  3. Ensure dashboard endpoints (`/metrics`, `/runs`, `/mcp`) read from the new telemetry data and include SDK trace IDs where available.
+- **Highlights**
+  1. `StateManager` ingests `tool_call` events directly from the function tools + Runner lifecycle (run/resume) rather than bespoke loops.
+  2. Guardrails now live inside the tool implementations (path jail + command/network allowlists), removing the global guardrails wrapper.
+  3. Dashboard endpoints continue to serve metrics/logs/MCP health without referencing deleted modules.
 - **Acceptance Criteria**
-  - Every SDK tool invocation triggers an audit entry via standardized callbacks, not ad-hoc logging.
-  - Guardrail code exists only inside tool definitions (or a tiny helper module) and no longer wraps the entire runtime.
-  - Dashboard continues to function without referencing deleted modules.
+  - Every SDK tool invocation logs an audit entry via the shared helper.
+  - Guardrail logic exists only inside `function_tools.py`.
+  - Dashboard remains operational with the new telemetry sources.
 
 ## Epic 5: Documentation & Release Harmonization
 - **Tasks**
