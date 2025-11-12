@@ -213,7 +213,7 @@ docker exec -it dev-agent python -m agent "Refactor source code and write change
 ## 11. MCP Connectivity & Health
 
 * `MCPClientManager` supports HTTP, WebSocket, and STDIO transports with auth tokens, rate limiting, and audit telemetry (`mcp_invoke` events).
-* CLI: `python -m agent mcp health` and `python -m agent mcp invoke <endpoint> <tool> --payload '{...}'`.
+* CLI: `python -m agent mcp health`; tool invocations occur through normal goals using `HostedMCPTool` definitions.
 * Dashboard exposes `/mcp` + `/mcp/health` cards summarizing latency, throttling, and total invocations; release snapshots stored under `/state/tools/mcp_endpoints.json`.
 
 ---
@@ -222,7 +222,7 @@ docker exec -it dev-agent python -m agent "Refactor source code and write change
 
 * Responses vs chat fallback is auto-detected but can be forced via `AGENT_FORCE_CHAT_COMPLETIONS=true`; `scripts/smoke_test.py` exercises both modes (CI + nightly chaos workflow).
 * Documentation portal (`docs/`) contains architecture, guides (including tool execution demo), runbooks (policy/network troubleshooting), and reports (compatibility matrix, GA readiness, gap analysis).
-* Release checklist references SBOM/Trivy/Cosign outputs plus newly required evidence (tool registry snapshot, MCP health dump, chaos log) before tagging GA builds.
+* Release checklist references SBOM/Trivy/Cosign outputs plus newly required evidence (SDK snapshot, MCP health dump, chaos log) before tagging GA builds.
 
 ---
 

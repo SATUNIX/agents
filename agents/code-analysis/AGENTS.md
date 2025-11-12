@@ -48,7 +48,7 @@ The Docker image creates a non-root `agent` user (UID 1000) and sets sane defaul
 - **Local Tools:** Implemented as SDK `@function_tool` callables (see `src/agent/function_tools.py`). Each tool enforces guardrails (path jail, command/network allowlists) and appends telemetry to `StateManager` when invoked.
 - **Logging:** Every tool call is timestamped, includes provenance (version/hash), and is appended to `/state/audit/`.
 - **Policies:** YAML bundles in `policies/{tools,network,paths}.yaml` define command allowlists, glob rules, and tool/token budgets. Validate with `python -m agent policies validate`; reload live config via `python -m agent policies reload` or the dashboard `POST /policies/reload` endpoint.
-- **MCP Connectivity:** `python -m agent mcp health` summarizes endpoint status/latency; invoke remote tools with `python -m agent mcp invoke <endpoint> <tool> --payload '{...}'`. All invocations emit `mcp_invoke` events to the audit log.
+- **MCP Connectivity:** `python -m agent mcp health` summarizes endpoint status/latency; hosted tools are invoked through normal goals (no separate CLI call). Runner logs + `/state/audit` capture each invocation.
 
 ## Operational Runbook
 
@@ -78,7 +78,7 @@ The Docker image creates a non-root `agent` user (UID 1000) and sets sane defaul
 
 ### Release Readiness
 
-- Follow `docs/reports/release-checklist.md` before tagging GA builds. Required artifacts: tool registry snapshot, MCP health dump, policy validation output, dual smoke logs, and chaos/nightly evidence.
+- Follow `docs/reports/release-checklist.md` before tagging GA builds. Required artifacts: SDK snapshot (`config view`), MCP health dump, policy validation output, dual smoke logs, and chaos/nightly evidence.
 - `docs/reports/ga-readiness.md` and `docs/reports/gap-analysis.md` must reflect the latest coverage and residual risks.
 
 ## Future Enhancements

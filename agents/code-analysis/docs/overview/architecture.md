@@ -5,7 +5,7 @@
 1. **Entrypoint (`python -m agent`)**
    - Typer CLI exposes run/resume, config inspection, policy/MCP utilities, and the observability dashboard.
 2. **Runtime Wiring (`agent.runtime.AgentRuntime`)**
-   - Loads `AgentConfig`, policies, telemetry, builds the SDK `Agent`, and hands it to an `openai.agents.Runner` (no bespoke orchestrator).
+   - Loads `AgentConfig`, policies, telemetry, builds the SDK `Agent` (function tools + Hosted MCP), and hands it to an `openai.agents.Runner`.
 3. **Reasoning Loop (`openai.agents.Agent` + `Runner`)**
    - The SDK handles planning/execution internally; upcoming Epics will add `@function_tool` hooks for filesystem + MPC actions.
 4. **Tooling Layer (`agent.function_tools`)**

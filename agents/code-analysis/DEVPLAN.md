@@ -287,12 +287,12 @@ Status [ ]
 
 * Refresh `SpecSheet.md`, `AGENTS.md`, and docs portal sections to describe the finalized execution model, MCP tooling, guardrails, and compatibility story.
 * Add operator-focused guidance on configuring tool policies, enabling/disabling network access, and troubleshooting Agents-vs-chat fallback behavior.
-* Update release workflows/checklists to include new verification artifacts (tool registry snapshots, MCP health dumps, chaos logs) before tagging GA builds.
+* Update release workflows/checklists to include new verification artifacts (SDK snapshots, MCP health dumps, chaos logs) before tagging GA builds.
 
 **Deliverables:**
 
 * Versioned documentation set (SpecSheet, AGENTS, docs portal) describing MCP tooling, guardrails, compatibility story, and operator workflows.
-* Release checklist template (`docs/reports/release-checklist.md`) referencing tool registry snapshots, MCP health dumps, and chaos/smoke evidence.
+* Release checklist template (`docs/reports/release-checklist.md`) referencing SDK snapshots, MCP health dumps, and chaos/smoke evidence.
 * `CHANGELOG.md` entry summarizing Stages 12–16 with links to the new tests/docs.
 
 

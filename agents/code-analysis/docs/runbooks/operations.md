@@ -67,10 +67,7 @@ If you need to inspect the raw storage, look under `/state` (the SDK stores meta
   ```bash
   python -m agent mcp health
   ```
-- Invoke hosted tools for testing:
-  ```bash
-  python -m agent mcp invoke http-test summarize --payload '{"path": "README.md"}'
-  ```
+- To exercise a hosted tool, run a goal that references it (e.g., `python -m agent run "Use http-test to summarize README"`) and inspect `/state/audit` for the resulting tool call.
 - Dashboard cards (`/mcp` and `/mcp/health`) show live status, latency, rate-limit incidents, `throttled` flags, and `total_invocations` so operators can spot hot endpoints immediately.
 
 ## 6. Environment Flags Snapshot
