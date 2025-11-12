@@ -282,7 +282,7 @@ Status [ ]
 
 ## Stage 16 – Documentation & Release Harmonization
 
-**Status:** 🚧 Planned – Ensures project collateral matches the implemented reality once Stages 12–15 land.
+**Status:** ✅ Completed – SpecSheet/AGENTS/docs refreshed, operator guidance expanded, release checklist/change log added.
 
 **Objectives:**
 
@@ -292,12 +292,9 @@ Status [ ]
 
 **Deliverables:**
 
-* Versioned documentation set (overview, guides, runbooks, reports) that tracks the enhanced stages and links to real evidence.
-* Release checklist template referencing the new verification data and a sign-off rubric for GA readiness.
-* Change log entry summarizing the completion of Stages 12–16 with cross-links to relevant docs/tests.
-
-* `policies/{tools.yaml, network.yaml, paths.yaml}`.
-* Policy validation CLI and reload signal handler.
+* Versioned documentation set (SpecSheet, AGENTS, docs portal) describing MCP tooling, guardrails, compatibility story, and operator workflows.
+* Release checklist template (`docs/reports/release-checklist.md`) referencing tool registry snapshots, MCP health dumps, and chaos/smoke evidence.
+* `CHANGELOG.md` entry summarizing Stages 12–16 with links to the new tests/docs.
 
 
 Status [ ]

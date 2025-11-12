@@ -77,13 +77,7 @@ Both send `SIGHUP` to the main runtime using `/state/agent.pid`.
   ```bash
   python -m agent mcp invoke http-test summarize --payload '{"path": "README.md"}'
   ```
-- Dashboard cards (`/mcp` and `/mcp/health`) show live status, latency, and rate-limit incidents.
-  Fields include `throttled` flags and `total_invocations` so operators can spot hot endpoints immediately.
-
-## 8. Log Retention & Archival
-
-- Rotate `/state/audit` and `/state/metrics.json` weekly by copying to long-term storage.
-- Store `/state/release_artifacts` (SBOM, Trivy, Cosign) as part of compliance evidence.
+- Dashboard cards (`/mcp` and `/mcp/health`) show live status, latency, rate-limit incidents, `throttled` flags, and `total_invocations` so operators can spot hot endpoints immediately.
 
 ## 6. Environment Flags Snapshot
 
@@ -102,4 +96,15 @@ Run the bundled script to ensure both Responses and chat-completion modes functi
 python scripts/smoke_test.py
 ```
 
-CI can execute the script twice—once with default settings and once with `AGENT_FORCE_CHAT_COMPLETIONS=true`—to track regressions across both backends.
+CI/nightly also runs the script with `AGENT_FORCE_CHAT_COMPLETIONS=true` to track regressions across both backends.
+
+## 8. Agents vs Chat Troubleshooting
+
+- If Responses mode fails, set `AGENT_FORCE_CHAT_COMPLETIONS=true` and rerun `scripts/smoke_test.py` to confirm fallback.
+- Expect `/state/tools/mcp_endpoints.json` and dashboard cards to show zero remote invocations when running chat-only.
+- Revalidate policies (`python -m agent policies validate`) whenever toggling modes to ensure guardrails remain synchronized.
+
+## 9. Log Retention & Archival
+
+- Rotate `/state/audit` and `/state/metrics.json` weekly by copying to long-term storage.
+- Store `/state/release_artifacts` (SBOM, Trivy, Cosign, tool registry snapshot, MCP health dump, smoke logs) as part of compliance evidence.

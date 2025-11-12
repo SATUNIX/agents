@@ -201,6 +201,30 @@ docker exec -it dev-agent python -m agent "Refactor source code and write change
 
 ---
 
+## 10. Policy-as-Code & Tool Enforcement
+
+* Policies live under `policies/{tools.yaml,network.yaml,paths.yaml}` and are loaded via `PolicyManager` with budgets for tool calls/tokens.
+* Guardrails consume both YAML and `config/settings.yaml` globs; multi-word command allowlists and env overrides (`AGENT_ALLOWED_COMMANDS`) are supported.
+* Operators can validate or reload policies at runtime via `python -m agent policies validate` / `policies reload` (SIGHUP) or the dashboard `POST /policies/reload` endpoint.
+
+---
+
+## 11. MCP Connectivity & Health
+
+* `MCPClientManager` supports HTTP, WebSocket, and STDIO transports with auth tokens, rate limiting, and audit telemetry (`mcp_invoke` events).
+* CLI: `python -m agent mcp health` and `python -m agent mcp invoke <endpoint> <tool> --payload '{...}'`.
+* Dashboard exposes `/mcp` + `/mcp/health` cards summarizing latency, throttling, and total invocations; release snapshots stored under `/state/tools/mcp_endpoints.json`.
+
+---
+
+## 12. Compatibility & Release Readiness
+
+* Responses vs chat fallback is auto-detected but can be forced via `AGENT_FORCE_CHAT_COMPLETIONS=true`; `scripts/smoke_test.py` exercises both modes (CI + nightly chaos workflow).
+* Documentation portal (`docs/`) contains architecture, guides (including tool execution demo), runbooks (policy/network troubleshooting), and reports (compatibility matrix, GA readiness, gap analysis).
+* Release checklist references SBOM/Trivy/Cosign outputs plus newly required evidence (tool registry snapshot, MCP health dump, chaos log) before tagging GA builds.
+
+---
+
 ## 10. References
 
 * OpenAI Agents SDK (Python): Loops, tools, guardrails, handoffs.
