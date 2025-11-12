@@ -22,7 +22,7 @@ class AgentRuntime:
         self.state = StateManager(self.config.state_dir, run_id=run_id, policy_manager=self.policies)
         self.mcp = MCPClientManager(self.config, state=self.state)
         self.mcp.write_snapshot(self.config.state_dir / "tools" / "mcp_endpoints.json")
-        self.agent = build_agent(self.config)
+        self.agent = build_agent(self.config, self.policies, self.state)
         self._runner = Runner(self.agent)
         self.policies.write_pid()
         signal.signal(signal.SIGHUP, self._handle_reload)

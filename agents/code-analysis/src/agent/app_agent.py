@@ -5,24 +5,15 @@ from __future__ import annotations
 from typing import List
 
 from .config import AgentConfig
-from .sdk_imports import Agent, HostedMCPTool, function_tool
+from .sdk_imports import Agent, HostedMCPTool
+from .function_tools import build_function_tools
 
 
-def build_agent(config: AgentConfig) -> Agent:
+def build_agent(config: AgentConfig, policies, state) -> Agent:
     instructions = (
         "You are a code-focused agent operating strictly within the workspace. "
         "Respect policy prompts, summarize plans, and call the provided tools when appropriate."
     )
-
-    @function_tool(name="workspace_status", description="Describe workspace constraints")
-    def workspace_status() -> str:
-        policy_path = config.policy_dir
-        return (
-            "Workspace root: "
-            + str(config.workspace)
-            + ", policy bundle: "
-            + str(policy_path)
-        )
 
     hosted_tools: List[HostedMCPTool] = []
     for name, profile in config.settings.mcp_endpoints.items():
@@ -37,9 +28,11 @@ def build_agent(config: AgentConfig) -> Agent:
             )
         )
 
+    function_tools = build_function_tools(config, policies, state)
+
     return Agent(
         name="code-analysis-agent",
         instructions=instructions,
         model=config.agent_model,
-        tools=[workspace_status, *hosted_tools],
+        tools=[*function_tools, *hosted_tools],
     )

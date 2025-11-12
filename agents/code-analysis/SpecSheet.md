@@ -206,6 +206,7 @@ docker exec -it dev-agent python -m agent "Refactor source code and write change
 * Policies live under `policies/{tools.yaml,network.yaml,paths.yaml}` and are loaded via `PolicyManager` with budgets for tool calls/tokens.
 * Guardrails consume both YAML and `config/settings.yaml` globs; multi-word command allowlists and env overrides (`AGENT_ALLOWED_COMMANDS`) are supported.
 * Operators can validate or reload policies at runtime via `python -m agent policies validate` / `policies reload` (SIGHUP) or the dashboard `POST /policies/reload` endpoint.
+* Local actions are exposed to the SDK via `@function_tool` (see `src/agent/function_tools.py`), ensuring guardrails and telemetry live inside each tool definition.
 
 ---
 

@@ -9,7 +9,7 @@ import pytest
 
 from agent.config import AgentConfig
 from agent.policies import PolicyManager
-from agent.guardrails import Guardrails
+from agent.state import StateManager
 
 
 @pytest.fixture()
@@ -114,5 +114,6 @@ def policy_manager(agent_config) -> PolicyManager:
 
 
 @pytest.fixture()
-def guardrails(agent_config, policy_manager) -> Guardrails:
-    return Guardrails(agent_config, policy_manager)
+@pytest.fixture()
+def state_manager(agent_config, policy_manager, tmp_path) -> StateManager:
+    return StateManager(tmp_path / "state", run_id="testcase", policy_manager=policy_manager)

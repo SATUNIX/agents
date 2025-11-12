@@ -77,31 +77,12 @@ mcp_endpoints:
     return AgentConfig.load()
 
 
-def test_mcp_http_and_stdio(tmp_path, monkeypatch):
+def test_mcp_http_health(tmp_path, monkeypatch):
     config = _make_agent_config(tmp_path, monkeypatch)
-
     transport = httpx.MockTransport(_http_handler)
-
     manager = MCPClientManager(
         config,
         http_client_factory=lambda: httpx.Client(transport=transport),
     )
-
     health = manager.health_report()
     assert any(entry["name"] == "http-test" and entry["status"] == "ok" for entry in health)
-
-    response = manager.invoke("http-test", "list", {"path": "notes.md"})
-    assert response["echo"]["payload"]["path"] == "notes.md"
-
-    stdio_response = manager.invoke("stdio-test", "echo", {"value": 1})
-    assert stdio_response["result"]["payload"]["value"] == 1
-
-    # Rate limit enforcement
-    config.settings.mcp_endpoints["http-test"].rate_limit_per_minute = 1
-    manager = MCPClientManager(
-        config,
-        http_client_factory=lambda: httpx.Client(transport=transport),
-    )
-    manager.invoke("http-test", "list", {})
-    with pytest.raises(RuntimeError):
-        manager.invoke("http-test", "list", {})

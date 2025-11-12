@@ -14,7 +14,7 @@ docker compose up -d --build
 docker exec dev-agent python scripts/demo_tool_run.py
 ```
 
-Currently this submits a descriptive goal through the SDK Runner (the forthcoming `@function_tool` refactor will reintroduce explicit file edits here).
+This uses the SDK-native `@function_tool` definitions in `src/agent/function_tools.py` (read/write/shell/repo summary). The runner will call those tools when needed.
 
 ## 3. Validate via Reviewer
 
@@ -24,7 +24,7 @@ After running the demo, launch a normal agent goal:
 docker exec dev-agent python -m agent run "Review workspace"
 ```
 
-Once the SDK-native tools are in place, the reviewer will validate actual file diffs; for now this confirms the Runner wiring.
+The reviewer validates actual file diffs (since the runner now leverages the function tools). Inspect `/state/audit` to see `tool_call` entries.
 
 ## 4. Observability
 

@@ -6,6 +6,6 @@ _Last updated: 2025-11-12_
 - ✅ **No Direct `openai.OpenAI` Usage** – Custom LLM wrappers (`llm.py`) and chat-completion fallbacks were deleted. The SDK controls model selection and backend negotiation.
 - ✅ **Policy & Telemetry Hooks** – `PolicyManager`/`StateManager` now listen to Runner events rather than wrapping their own orchestration, preserving guardrails without interfering with SDK flow.
 - ✅ **Hosted MCP Integration** – Hosted endpoints are surfaced through `HostedMCPTool` inside the Agent definition. The legacy MCP invoker exists only as a health/telemetry helper.
-- 🚧 **Function Tool Migration** – Local filesystem tools have not yet been reimplemented as `@function_tool` decorators; this is tracked in DEVPLAN Epic 3.
+- ✅ **Function Tool Migration** – Local filesystem tools now use `@function_tool` decorators (see `src/agent/function_tools.py`); Hosted MCP tools are declared via the SDK’s `HostedMCPTool`.
 
 No outstanding “custom orchestration” issues remain.

@@ -101,4 +101,8 @@ CI/nightly also runs the script with `AGENT_FORCE_CHAT_COMPLETIONS=true` to trac
 ## 9. Log Retention & Archival
 
 - Rotate `/state/audit` and `/state/metrics.json` weekly by copying to long-term storage.
-- Store `/state/release_artifacts` (SBOM, Trivy, Cosign, tool registry snapshot, MCP health dump, smoke logs) as part of compliance evidence.
+- Store `/state/release_artifacts` (SBOM, Trivy, Cosign, SDK snapshot, MCP health dump, smoke logs) as part of compliance evidence.
+- **Adding a new tool**
+  - Define it in `src/agent/function_tools.py` using `@function_tool` and capture `config/policies/state` for guardrails + telemetry.
+  - Rebuild the agent (`build_agent`) automatically picks up the function when returned in `build_function_tools`.
+  - For hosted integrations, append a `HostedMCPTool` entry via `config/settings.yaml`.

@@ -45,7 +45,7 @@ The Docker image creates a non-root `agent` user (UID 1000) and sets sane defaul
 ## Tooling Expectations
 
 - **Hosted MCP Tools:** Connect by URL for remote APIs or datasets. Credentials and schemas live alongside tool definitions.
-- **Local Tools:** Installed under `/tools` using an internal tool manager; executions inherit the same guardrails (filesystem sandbox, command allowlist, logging).
+- **Local Tools:** Implemented as SDK `@function_tool` callables (see `src/agent/function_tools.py`). Each tool enforces guardrails (path jail, command/network allowlists) and appends telemetry to `StateManager` when invoked.
 - **Logging:** Every tool call is timestamped, includes provenance (version/hash), and is appended to `/state/audit/`.
 - **Policies:** YAML bundles in `policies/{tools,network,paths}.yaml` define command allowlists, glob rules, and tool/token budgets. Validate with `python -m agent policies validate`; reload live config via `python -m agent policies reload` or the dashboard `POST /policies/reload` endpoint.
 - **MCP Connectivity:** `python -m agent mcp health` summarizes endpoint status/latency; invoke remote tools with `python -m agent mcp invoke <endpoint> <tool> --payload '{...}'`. All invocations emit `mcp_invoke` events to the audit log.

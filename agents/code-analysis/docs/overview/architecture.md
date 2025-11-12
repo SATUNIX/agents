@@ -8,8 +8,8 @@
    - Loads `AgentConfig`, policies, telemetry, builds the SDK `Agent`, and hands it to an `openai.agents.Runner` (no bespoke orchestrator).
 3. **Reasoning Loop (`openai.agents.Agent` + `Runner`)**
    - The SDK handles planning/execution internally; upcoming Epics will add `@function_tool` hooks for filesystem + MPC actions.
-4. **Tooling Layer (`agent.tools.*`)**
-   - Local deterministic tools (read/write/shell/repo summary) include schemas, guardrails, auditing, and metrics hooks; remote tools are declared via MPC endpoints.
+4. **Tooling Layer (`agent.function_tools`)**
+   - Local deterministic tools are registered via `@function_tool` decorators (read/write/shell/repo summary) and emit telemetry directly; remote tools are declared via `HostedMCPTool`.
 5. **State & Telemetry (`agent.state.StateManager`)**
    - JSONL audit logs and metrics (`metrics.json`) plus release artifacts (`/state/release_artifacts`). SDK persistence handles checkpoints internally.
 6. **Observability (`agent.observability.dashboard`)**

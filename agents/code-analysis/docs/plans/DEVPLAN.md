@@ -22,7 +22,7 @@ Goal: Delete custom orchestration/tooling layers and rebuild the repo around the
   - Checkpoint/resume flows rely on SDK persistence features (or wrappers around them) rather than `StateManager` plan snapshots.
   - Deleted files no longer referenced anywhere in the codebase.
 
-## Epic 3: Convert Tools to `@function_tool` & `HostedMCPTool`
+## Epic 3 (Done): Convert Tools to `@function_tool` & `HostedMCPTool`
 - **Tasks**
   1. Replace `src/agent/tools/*`, `ToolContext`, `ToolRegistry`, and `ToolInvoker` with SDK-decorated functions (`@function_tool`) that perform file read/write, shell exec, repo summary, etc. Guardrails (path jail, command/network allowlists) live inside these functions.
   2. Model hosted integrations using `HostedMCPTool` definitions that reference the MCP endpoints declared in config. Remove custom MCP invocation plumbing from `MCPClientManager`, or slim it to a health monitor only.
@@ -32,7 +32,7 @@ Goal: Delete custom orchestration/tooling layers and rebuild the repo around the
   - MCP endpoints appear as `HostedMCPTool` instances consumed directly by the SDK.
   - Documentation references SDK decorators (no mention of `ToolContext` or `ToolRegistry`).
 
-## Epic 4: Telemetry, Guardrails, and Health Hooks
+## Epic 4 (Done): Telemetry, Guardrails, and Health Hooks
 - **Tasks**
   1. Keep `StateManager` (or replace it with a simplified logger) focused on audit trails, metrics, and release artifacts. Hook it into SDK callbacks (`Runner.on_step`, tool decorators) instead of manual logging.
   2. Retain minimal guardrails (path normalization, command/network allowlists) by importing helper functions inside each `@function_tool`. Remove the global guardrails class if the SDK’s built-in validation suffices.
@@ -51,3 +51,14 @@ Goal: Delete custom orchestration/tooling layers and rebuild the repo around the
   - Documentation contains only SDK terminology; no references to removed files (`loop.py`, `ToolRegistry`, `AgentSession`).
   - Release checklist includes verification of SDK tool registration and hosted MCP health via SDK APIs.
   - Dev plan, compliance report, and changelog collectively reflect the simplified, SDK-native system.
+
+
+
+Also noted: Requirement already satisfied: pycparser in i:\ai\agents\agents\code-analysis\.venv\lib\site-packages (from cffi>=2.0.0->cryptography>=3.4.0->pyjwt[crypto]>=2.10.1->mcp<2,>=1.11.0->openai-agents) (2.23)
+Requirement already satisfied: click>=7.0 in i:\ai\agents\agents\code-analysis\.venv\lib\site-packages (from uvicorn>=0.31.1->mcp<2,>=1.11.0->openai-agents) (8.1.7)
+(.venv) PS I:\AI\agents\agents\code-analysis> pytest  -q
+ImportError while loading conftest 'I:\AI\agents\agents\code-analysis\tests\conftest.py'.
+tests\conftest.py:10: in <module>
+    from agent.config import AgentConfig
+E   ModuleNotFoundError: No module named 'agent'
+(.venv) PS I:\AI\agents\agents\code-analysis>

@@ -132,52 +132,6 @@ class MCPClientManager:
         }
 
     # ------------------------------------------------------------------
-    def invoke(self, endpoint: str, tool: str, payload: Dict[str, Any]) -> Dict[str, Any]:
-        if endpoint not in self._endpoints:
-            raise KeyError(f"Unknown MCP endpoint '{endpoint}'")
-        profile = self._endpoints[endpoint]
-        limiter = self._limiters[endpoint]
-        if not limiter.allow():
-            self._states[endpoint].throttled = True
-            raise RuntimeError(f"Endpoint '{endpoint}' rate limit exceeded")
-        self._states[endpoint].throttled = False
-        self._states[endpoint].total_invocations += 1
-
-        try:
-            if profile.transport == "http" and profile.url:
-                response = self._http_client(endpoint).post(
-                    profile.url.rstrip("/") + "/invoke",
-                    headers=self._headers(profile),
-                    json={"tool": tool, "payload": payload},
-                )
-                response.raise_for_status()
-                result = self._maybe_json(response.text)
-            elif profile.transport == "ws" and profile.url:
-                message = json.dumps({"type": "invoke", "tool": tool, "payload": payload})
-                with self.ws_connect_fn(profile.url, additional_headers=self._ws_headers(profile)) as ws:
-                    ws.send(message)
-                    reply = ws.recv()
-                result = self._maybe_json(reply)
-            elif profile.transport == "stdio" and profile.command:
-                input_payload = json.dumps({"tool": tool, "payload": payload})
-                proc = subprocess.run(
-                    [profile.command, *profile.args],
-                    input=input_payload.encode(),
-                    capture_output=True,
-                    env=self._stdio_env(profile),
-                    check=True,
-                )
-                result = self._maybe_json(proc.stdout.decode())
-            else:
-                raise RuntimeError(f"Unsupported transport for endpoint '{endpoint}'")
-        except Exception as exc:
-            self._log_event("mcp_invoke", endpoint, tool, payload, status="error", error=str(exc))
-            raise
-
-        self._log_event("mcp_invoke", endpoint, tool, payload, status="ok", result=result)
-        return result
-
-    # ------------------------------------------------------------------
     def dashboard_payload(self) -> Dict[str, Any]:
         return {
             "endpoints": self.health_report(),
@@ -227,27 +181,3 @@ class MCPClientManager:
         except json.JSONDecodeError:
             pass
         return {"raw": value}
-
-    def _log_event(
-        self,
-        kind: str,
-        endpoint: str,
-        tool: str,
-        payload: Dict[str, Any],
-        status: str,
-        result: Dict[str, Any] | None = None,
-        error: str | None = None,
-    ) -> None:
-        if not self.state:
-            return
-        self.state.append_event(
-            kind,
-            {
-                "endpoint": endpoint,
-                "tool": tool,
-                "payload": payload,
-                "status": status,
-                "result": result,
-                "error": error,
-            },
-        )

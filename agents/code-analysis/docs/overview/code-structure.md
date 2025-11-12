@@ -7,7 +7,7 @@ src/agent/
 ├── config.py            # Pydantic settings, YAML registry, secrets
 ├── loop.py              # Planner → Executor → Reviewer orchestrator
 ├── agents/              # (Legacy) – removed in SDK alignment (see plan)
-├── tools/               # Legacy tool framework (to be replaced with @function_tool)
+├── function_tools.py    # @function_tool definitions (filesystem, shell, repo summary)
 ├── guardrails.py        # Path + command policies
 ├── policies.py          # Policy-as-code loader + budgets + reload hooks
 ├── state.py             # Metrics, checkpoints, audit logging
@@ -24,9 +24,7 @@ src/agent/
 
 ### Tooling APIs
 
-- `ToolContext` → gives each legacy tool access to configuration (scheduled for removal once function tools land).
-- `LocalTool` → base class with schema validation, guardrails, `_run_shell`, `_within_workspace` helpers.
-- `ToolRegistry` / `ToolInvoker` → legacy registry/execution path; DEVPLAN Epic 3 will replace them with `@function_tool` definitions.
+- `build_function_tools` → returns the SDK-decorated tool callables bound to runtime config/policies.
 
 ### Testing & CI Hooks
 

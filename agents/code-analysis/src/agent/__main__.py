@@ -99,19 +99,6 @@ def mcp_health() -> None:
     console.print(manager.health_report())
 
 
-@mcp_app.command("invoke")
-def mcp_invoke(
-    endpoint: str = typer.Argument(..., help="MCP endpoint name"),
-    tool: str = typer.Argument(..., help="Tool exposed by the endpoint"),
-    payload: str = typer.Option("{}", help="JSON payload"),
-) -> None:
-    config = AgentConfig.load()
-    manager = MCPClientManager(config)
-    data = json.loads(payload)
-    result = manager.invoke(endpoint, tool, data)
-    console.print(result)
-
-
 def main() -> None:  # pragma: no cover - Typer entry point
     app()
 
