@@ -10,7 +10,7 @@
 
 3. **MCP Health Dump**
    - `python -m agent mcp health > state/release_artifacts/mcp_health.json`.
-   - For each critical endpoint, run `python -m agent mcp invoke ...` with a dry-run payload and capture the output.
+   - For each critical endpoint, capture a Runner log where the hosted tool is invoked (goal: "Use <endpoint> tool...") and store the log snippet alongside the health dump.
 
 4. **Compatibility Smoke**
    - `python scripts/smoke_test.py`

@@ -5,7 +5,7 @@
 | Symptom | Likely Cause | Resolution |
 | --- | --- | --- |
 | `/usr/local/bin/python: No module named agent` | Container dependencies missing editable install | Ensure Docker build ran after latest changes (`docker compose build`). |
-| `GuardrailViolation: Command 'curl' is not allowed` | `ALLOW_NET=false` or command not whitelisted | Update env vars / guardrail config, or use approved commands (`ls`, `cat`, `python`, `pytest`, `rg`, `git status`). |
+| `ValueError: Command 'curl' not allowed` | `ALLOW_NET=false` or command not whitelisted | Update env vars / guardrail config, or use approved commands (`ls`, `cat`, `python`, `pytest`, `rg`, `git status`). |
 | `Unknown agent profile` | Missing entry in `config/settings.yaml` | Define agent/tool/policy block, redeploy. |
 | Failing MCP health | Endpoint offline or missing token | Regenerate secrets, confirm URLs in `/state/tools/mcp_endpoints.json`. |
 

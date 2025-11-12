@@ -8,7 +8,7 @@ src/agent/
 ├── loop.py              # Planner → Executor → Reviewer orchestrator
 ├── agents/              # (Legacy) – removed in SDK alignment (see plan)
 ├── function_tools.py    # @function_tool definitions (filesystem, shell, repo summary)
-├── guardrails.py        # Path + command policies
+├── policies.py          # Policy loader (path/command budgets, reload)
 ├── policies.py          # Policy-as-code loader + budgets + reload hooks
 ├── state.py             # Metrics, checkpoints, audit logging
 ├── mcp.py               # Hosted MCP endpoint metadata
@@ -28,5 +28,5 @@ src/agent/
 
 ### Testing & CI Hooks
 
-- `tests/` contains config/tool/guardrail/state coverage using temp directories.
+- `tests/` contains config/tool/state coverage using temp directories.
 - GitHub Actions handle lint → type check → pytest plus Docker build, while tag pushes trigger release (SBOM, Trivy, Cosign).
