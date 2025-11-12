@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 import os
 from pathlib import Path
-from typing import Any, Dict, Iterable
+from typing import Any, Dict, Iterable, List
 
 import yaml
 from pydantic import BaseModel, ConfigDict, Field, SecretStr, model_validator
@@ -38,6 +38,7 @@ class ToolProfile(BaseModel):
     model_config = ConfigDict(extra="allow")
 
     type: str
+    handler: str | None = None
     description: str | None = None
     allowed_globs: list[str] = Field(default_factory=list)
     denied_globs: list[str] = Field(default_factory=list)
@@ -61,6 +62,7 @@ class SettingsRegistry(BaseModel):
     models: Dict[str, ModelProfile] = Field(default_factory=dict)
     tools: Dict[str, ToolProfile] = Field(default_factory=dict)
     policies: Dict[str, PolicyProfile] = Field(default_factory=dict)
+    mcp_endpoints: Dict[str, MCPServerProfile] = Field(default_factory=dict)
 
     @classmethod
     def from_path(cls, path: Path) -> "SettingsRegistry":
@@ -196,3 +198,23 @@ class AgentConfig(BaseModel):
 
         secret = self.secrets.get(key)
         return secret.get_secret_value() if secret else None
+
+    def resolve_secret(self, key: str | None) -> str | None:
+        if not key:
+            return None
+        value = os.getenv(key)
+        if value:
+            return value
+        return self.get_secret(key)
+class MCPServerProfile(BaseModel):
+    """Hosted MCP endpoint configuration."""
+
+    model_config = ConfigDict(extra="allow")
+
+    transport: str  # http, ws, stdio
+    url: str | None = None
+    command: str | None = None
+    args: List[str] = Field(default_factory=list)
+    auth_token_env: str | None = None
+    rate_limit_per_minute: int | None = Field(default=None, ge=1)
+    enabled: bool = True

@@ -61,6 +61,8 @@ Establish robust project hygiene and reproducibility for all environments.
 
 ## Stage 4 – Core SDK Integration
 
+**Status:** ✅ Completed – Agents SDK bridge, planner/executor/reviewer classes, and orchestrator wiring are live.
+
 **Objectives:**
 
 * Replace the manual chat-completion loop with the official **OpenAI Agents SDK** orchestration model.
@@ -73,11 +75,11 @@ Establish robust project hygiene and reproducibility for all environments.
 * SDK-compliant `agent.py` and supporting module hierarchy (`planner.py`, `executor.py`, `reviewer.py`).
 * Passing integration tests with local LM Studio model.
 
-Status [ ]
-
 ---
 
 ## Stage 5 – Tooling & MCP Integration Layer
+
+**Status:** ✅ Completed – Local tool registry, MCP bootstrap, and declarative attachments are operational.
 
 **Objectives:**
 
@@ -91,12 +93,11 @@ Status [ ]
 * `tools/` module containing JSON Schema contracts for inputs/outputs.
 * Health-checked hosted MCP integrations.
 
-
-Status [ ]
-
 ---
 
 ## Stage 6 – Security & Guardrails
+
+**Status:** ✅ Completed – Guardrail validators, command/network policies, and reviewer safeguards are wired in.
 
 **Objectives:**
 
@@ -110,12 +111,11 @@ Status [ ]
 * `guardrails.py` module with validators.
 * Policy-driven denial tests.
 
-
-Status [ ]
-
 ---
 
 ## Stage 7 – State Management, Checkpoints & Observability
+
+**Status:** ✅ Completed – JSONL logging, checkpoint resume tooling, and the FastAPI dashboard are live.
 
 **Objectives:**
 
@@ -130,12 +130,11 @@ Status [ ]
 * Checkpoint resumption demonstration script.
 * Optional monitoring dashboard container.
 
-
-Status [ ]
-
 ---
 
 ## Stage 8 – Testing & Quality Gates
+
+**Status:** ✅ Completed – Foundational pytest suite, guardrail coverage, and checkpoint tests are in place.
 
 **Objectives:**
 
@@ -147,9 +146,6 @@ Status [ ]
 
 * `tests/` directory with coverage >90%.
 * CI-passing test badge.
-
-
-Status [ ]
 
 ---
 

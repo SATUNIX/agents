@@ -1,3 +1,4 @@
+version: "3.9"
 
 services:
   dev-agent:
@@ -27,6 +28,17 @@ services:
       interval: 30s
       timeout: 5s
       retries: 3
+  dev-agent-dashboard:
+    image: code-analysis-agent:dev
+    container_name: dev-agent-dashboard
+    restart: unless-stopped
+    command: ["python", "-m", "agent", "dashboard", "--host", "0.0.0.0", "--port", "7081"]
+    environment:
+      AGENT_STATE_DIR: /state
+    volumes:
+      - agent_state:/state
+    depends_on:
+      - dev-agent
     ports:
       - "7081:7081"
 

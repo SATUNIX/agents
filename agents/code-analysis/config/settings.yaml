@@ -5,8 +5,9 @@ models:
     max_tokens: 400
 
 tools:
-  workspace.read:
-    type: filesystem_read
+  workspace.read_file:
+    type: local
+    handler: workspace.read_file
     description: Read-only access to repository files
     allowed_globs:
       - "**/*.md"
@@ -14,8 +15,9 @@ tools:
       - "**/*.txt"
     denied_globs:
       - "**/.git/**"
-  workspace.write:
-    type: filesystem_write
+  workspace.write_file:
+    type: local
+    handler: workspace.write_file
     description: Write access constrained to source/docs files
     allowed_globs:
       - "src/**/*.py"
@@ -23,6 +25,18 @@ tools:
       - "docs/**/*.md"
     denied_globs:
       - "**/.git/**"
+  workspace.shell_exec:
+    type: local
+    handler: workspace.shell_exec
+    description: Execute bounded shell commands
+    allowed_globs:
+      - "src/**"
+    denied_globs:
+      - "**/.git/**"
+  workspace.repo_summary:
+    type: local
+    handler: workspace.repo_summary
+    description: Summarize repo contents and hash file lists
 
 policies:
   safety.default:
@@ -52,8 +66,10 @@ agents:
     description: Execute plan steps using approved tools
     model: gpt-4o-mini
     tools:
-      - workspace.read
-      - workspace.write
+      - workspace.read_file
+      - workspace.write_file
+      - workspace.shell_exec
+      - workspace.repo_summary
     policies:
       - safety.default
       - workspace.write-guard
@@ -61,6 +77,17 @@ agents:
     description: Validate outputs and enforce policies
     model: gpt-4o-mini
     tools:
-      - workspace.read
+      - workspace.read_file
     policies:
       - review.default
+
+mcp_endpoints:
+  docs-vector-store:
+    transport: http
+    url: http://host.docker.internal:9000/mcp
+    auth_token_env: DOCS_MCP_TOKEN
+    rate_limit_per_minute: 30
+  issue-tracker:
+    transport: ws
+    url: ws://host.docker.internal:9100/mcp
+    rate_limit_per_minute: 20
