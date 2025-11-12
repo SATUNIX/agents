@@ -64,8 +64,9 @@ The Docker image creates a non-root `agent` user (UID 1000) and sets sane defaul
 | --- | --- |
 | Policy reload | `python -m agent policies reload` |
 | Policy validation | `python -m agent policies validate` |
-| Tool listing | `python -m agent tools list` |
 | MCP health | `python -m agent mcp health` |
+| Agent goal | `python -m agent run "Summarize repo"` |
+| Agent resume | `python -m agent resume <run-id>` |
 | Compatibility smoke (Responses) | `python scripts/smoke_test.py` |
 | Compatibility smoke (Chat fallback) | `AGENT_FORCE_CHAT_COMPLETIONS=true python scripts/smoke_test.py` |
 

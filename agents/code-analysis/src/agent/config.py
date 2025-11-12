@@ -77,8 +77,6 @@ class AgentConfig(BaseModel):
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
-    openai_base_url: str
-    openai_api_key: SecretStr
     agent_model: str
     workspace: Path
     state_dir: Path
@@ -118,8 +116,6 @@ class AgentConfig(BaseModel):
         create_dirs = env.get("AGENT_CREATE_DIRS", "true").lower() != "false"
 
         return cls(
-            openai_base_url=env.get("OPENAI_BASE_URL", "http://host.docker.internal:1234/v1"),
-            openai_api_key=SecretStr(env.get("OPENAI_API_KEY", "sk-fake")),
             agent_model=env.get("AGENT_MODEL", "gpt-4o-mini"),
             workspace=workspace,
             state_dir=state_dir,
@@ -184,7 +180,6 @@ class AgentConfig(BaseModel):
         """Return a redacted, serialization-friendly payload."""
 
         return {
-            "openai_base_url": self.openai_base_url,
             "agent_model": self.agent_model,
             "workspace": str(self.workspace),
             "state_dir": str(self.state_dir),
@@ -194,7 +189,6 @@ class AgentConfig(BaseModel):
             "allow_net": self.allow_net,
             "settings_path": str(self.settings_path),
             "settings": self.settings.model_dump(),
-            "openai_api_key": self._redact_secret(self.openai_api_key),
             "secrets": {key: self._redact_secret(value) for key, value in self.secrets.items()},
         }
 

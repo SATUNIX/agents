@@ -11,7 +11,7 @@ def test_agent_config_loads(agent_config: AgentConfig) -> None:
     assert agent_config.workspace.exists()
     assert agent_config.settings.agents
     assert agent_config.settings.tools
-    assert agent_config.openai_api_key.get_secret_value() == "sk-test"
+    assert agent_config.agent_model == "gpt-4o-mini"
 
 
 def test_ensure_within_workspace(agent_config: AgentConfig, tmp_path) -> None:

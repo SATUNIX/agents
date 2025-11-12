@@ -13,8 +13,8 @@
    docker exec dev-agent python -m agent run "Summarize repo"
    ```
 3. **Pause/Resume**
-   - Capture the `run_id` printed in `/state/checkpoints`.
-   - Resume via `python -m agent checkpoints resume <run_id>`.
+   - Capture the `run_id` emitted by the SDK (printed in the Runner logs).
+   - Resume via `python -m agent resume <run_id>` (delegates to `Runner.resume`).
 4. **Shutdown**
    ```bash
    docker compose down
@@ -42,19 +42,13 @@ Both send `SIGHUP` to the main runtime using `/state/agent.pid`.
 
 ## 3. Checkpoint Recovery
 
-1. List checkpoints:
-   ```bash
-   python -m agent checkpoints list
-   ```
-2. Inspect latest session snapshot:
-   ```bash
-   python scripts/checkpoint_demo.py
-   ```
-3. Resume execution:
-   ```bash
-   python -m agent checkpoints resume <run_id>
-   ```
-4. Restarted runs continue from the last saved `current_step` and reapply reviewer validation.
+The official SDK manages persistence internally. To resume a run:
+
+```bash
+python -m agent resume <run_id>
+```
+
+If you need to inspect the raw storage, look under `/state` (the SDK stores metadata in provider-specific directories); `scripts/checkpoint_demo.py` can still dump recent audit entries for reference.
 
 ## 4. Network Diagnostics
 

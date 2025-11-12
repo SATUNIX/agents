@@ -2,7 +2,7 @@
 
 Goal: Delete custom orchestration/tooling layers and rebuild the repo around the official OpenAI Agents Python SDK primitives (`Agent`, `Runner`, `@function_tool`, `HostedMCPTool`). Each epic below lists the files to refactor/remove, the SDK feature that replaces them, and the acceptance criteria.
 
-## Epic 1: Establish SDK Foundation & Dependencies
+## Epic 1 (Done): Establish SDK Foundation & Dependencies
 - **Tasks**
   1. Replace bespoke LLM wrappers with the official SDK client. Update `pyproject.toml`/`requirements.*` to depend on `openai-agents` and remove redundant packages (`sdk.py`, `llm.py`).
   2. Rewrite `AgentConfig` to expose only environment + policy settings required by the official SDK. Drop custom OpenAI fallback logic now handled by the library.
@@ -12,7 +12,7 @@ Goal: Delete custom orchestration/tooling layers and rebuild the repo around the
   - Config module no longer references `src/agent/sdk.py` or chat-completion fallbacks; SDK handles backend selection.
   - Compliance doc shows zero “custom orchestration” issues.
 
-## Epic 2: Rebuild Runtime & Orchestration with `Agent`/`Runner`
+## Epic 2 (Done): Rebuild Runtime & Orchestration with `Agent`/`Runner`
 - **Tasks**
   1. Delete `src/agent/loop.py`, `src/agent/agents/*`, and `AgentOrchestrator`. Define a single `Agent` (or multiple roles if needed) using SDK-native planners/workflows.
   2. Replace `AgentRuntime` with a thin `Runner` launcher that wires config + telemetry into SDK hooks. Remove `AgentSession`/checkpoint logic duplicated by the SDK.

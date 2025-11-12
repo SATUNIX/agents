@@ -4,9 +4,9 @@
    - `python -m agent policies validate`
    - `python -m agent config view > state/release_artifacts/config.json`
 
-2. **Tool Registry Snapshot**
-   - Run `python -m agent tools list > state/release_artifacts/tools.txt`.
-   - Ensure `state/tools/registry.json` is archived with the release artifacts.
+2. **SDK Snapshot**
+   - Record the active model + instructions: `python -m agent config view > state/release_artifacts/config.json` (already captured above but double-check before release).
+   - Once `@function_tool` support lands, archive the generated tool manifest; for now include a short note describing which tools are enabled.
 
 3. **MCP Health Dump**
    - `python -m agent mcp health > state/release_artifacts/mcp_health.json`.
@@ -25,6 +25,6 @@
 
 7. **Sign-off Rubric**
    - ✅ Docs portal updated (architecture, guides, runbooks, reports).
-   - ✅ Release artifacts archived: SBOM, Trivy, Cosign, tool registry snapshot, MCP health dump, smoke logs.
+   - ✅ Release artifacts archived: SBOM, Trivy, Cosign, SDK snapshot, MCP health dump, smoke logs.
    - ✅ Outstanding risks documented in `docs/reports/ga-readiness.md` and `docs/reports/gap-analysis.md`.
    - ☐ Coverage badge published (pending action if unchecked).

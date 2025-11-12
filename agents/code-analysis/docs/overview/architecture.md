@@ -3,15 +3,15 @@
 ## Runtime Layers
 
 1. **Entrypoint (`python -m agent`)**
-   - Typer CLI exposes run/resume, config inspection, tool invocation, checkpoint ops, and the observability dashboard.
+   - Typer CLI exposes run/resume, config inspection, policy/MCP utilities, and the observability dashboard.
 2. **Runtime Wiring (`agent.runtime.AgentRuntime`)**
-   - Loads `AgentConfig` (Pydantic + YAML registry + secrets), instantiates `StateManager`, LLM client, tool registry/invoker, MCP manager, and orchestrator.
-3. **Reasoning Loop (`agent.loop.AgentOrchestrator`)**
-   - Planner → Executor → Reviewer roles implemented via the OpenAI Agents SDK (with chat-completion fallback) share an `AgentSession` checkpoint across runs.
+   - Loads `AgentConfig`, policies, telemetry, builds the SDK `Agent`, and hands it to an `openai.agents.Runner` (no bespoke orchestrator).
+3. **Reasoning Loop (`openai.agents.Agent` + `Runner`)**
+   - The SDK handles planning/execution internally; upcoming Epics will add `@function_tool` hooks for filesystem + MPC actions.
 4. **Tooling Layer (`agent.tools.*`)**
    - Local deterministic tools (read/write/shell/repo summary) include schemas, guardrails, auditing, and metrics hooks; remote tools are declared via MPC endpoints.
 5. **State & Telemetry (`agent.state.StateManager`)**
-   - JSONL audit logs, metrics (`metrics.json`), checkpoints (`/state/checkpoints/<run-id>`), and release artifacts (`/state/release_artifacts`).
+   - JSONL audit logs and metrics (`metrics.json`) plus release artifacts (`/state/release_artifacts`). SDK persistence handles checkpoints internally.
 6. **Observability (`agent.observability.dashboard`)**
    - FastAPI service on port 7081 exposes health, metrics, logs, checkpoints, and MCP endpoint data (including `/mcp` + `/mcp/health` cards).
 7. **Policy-as-Code (`policies/*.yaml` + `agent.policies.PolicyManager`)**
@@ -24,7 +24,6 @@
 | `/workspace` | User repository for read/write operations. |
 | `/state` | Logs, checkpoints, metrics, release artifacts, dashboard snapshots. |
 | `/tools` | Installed local tools and caches. |
-| `/state/tools/registry.json` | Tool manifest for reproducibility. |
 | `/state/tools/mcp_endpoints.json` | MCP health snapshot. |
 | `/state/agent.pid` | PID reference for policy reloads. |
 | `policies/` | Policy-as-code bundle (mounted via `AGENT_POLICY_DIR`). |

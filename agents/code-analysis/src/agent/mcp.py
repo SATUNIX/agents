@@ -15,6 +15,7 @@ import httpx
 from websockets.sync.client import connect as ws_connect  # type: ignore
 
 from .config import AgentConfig, MCPServerProfile
+from .state import StateManager
 
 
 class RateLimiter:
@@ -51,6 +52,7 @@ class MCPClientManager:
     config: AgentConfig
     http_client_factory: Callable[[], httpx.Client] | None = None
     ws_connect_fn: Callable[..., any] = ws_connect
+    state: StateManager | None = None
     _endpoints: Dict[str, MCPServerProfile] = field(init=False)
     _http_clients: Dict[str, httpx.Client] = field(init=False, default_factory=dict)
     _limiters: Dict[str, RateLimiter] = field(init=False, default_factory=dict)

@@ -14,21 +14,17 @@ docker compose up -d --build
 docker exec dev-agent python scripts/demo_tool_run.py
 ```
 
-What happens:
-
-1. The script instantiates `AgentRuntime`, which loads policies and writes `demo.txt` via `workspace.write_file`.
-2. The script immediately reads the file back via `workspace.read_file` and prints the contents.
-3. A `demo_tool_run` event is appended to `/state/audit/run-<run_id>.jsonl`, capturing the tool output.
+Currently this submits a descriptive goal through the SDK Runner (the forthcoming `@function_tool` refactor will reintroduce explicit file edits here).
 
 ## 3. Validate via Reviewer
 
 After running the demo, launch a normal agent goal:
 
 ```bash
-docker exec dev-agent python -m agent run "Review demo.txt changes"
+docker exec dev-agent python -m agent run "Review workspace"
 ```
 
-The reviewer sees the tool-backed edits (since the executor can now invoke tools from Agents SDK function-calls) and validates the diff before completing the run. Check `/state/checkpoints/<run_id>/session.json` to confirm the reviewer summary includes the file inspection.
+Once the SDK-native tools are in place, the reviewer will validate actual file diffs; for now this confirms the Runner wiring.
 
 ## 4. Observability
 
