@@ -9,6 +9,7 @@ src/agent/
 ├── agents/              # SDK-backed role implementations
 ├── tools/               # Local tool framework + registry/invoker
 ├── guardrails.py        # Path + command policies
+├── policies.py          # Policy-as-code loader + budgets + reload hooks
 ├── state.py             # Metrics, checkpoints, audit logging
 ├── mcp.py               # Hosted MCP endpoint metadata
 ├── sdk.py               # OpenAI Agents SDK gateway with fallbacks

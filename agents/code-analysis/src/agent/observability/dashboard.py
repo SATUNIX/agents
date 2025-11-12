@@ -9,6 +9,8 @@ from typing import List
 
 from fastapi import FastAPI, HTTPException
 
+from ..config import AgentConfig
+from ..mcp import MCPClientManager
 from ..policies import PolicyManager
 
 
@@ -76,15 +78,36 @@ def checkpoint(run_id: str) -> dict:
     return {"run_id": run_id, "checkpoints": data}
 
 
+def _mcp_manager() -> MCPClientManager:
+    config = AgentConfig.load()
+    return MCPClientManager(config)
+
+
 @app.get("/mcp")
 def mcp_endpoints() -> dict:
-    return _safe_read_json(STATE_DIR / "tools" / "mcp_endpoints.json", {})
+    manager = _mcp_manager()
+    try:
+        return manager.dashboard_payload()
+    finally:
+        manager.close()
+
+
+@app.get("/mcp/health")
+def mcp_health() -> dict:
+    manager = _mcp_manager()
+    try:
+        return {"health": manager.health_report()}
+    finally:
+        manager.close()
 
 
 @app.post("/policies/reload")
 def reload_policies() -> dict:
     manager = PolicyManager(Path(os.getenv("AGENT_POLICY_DIR", "policies")))
-    manager.send_reload_signal()
+    try:
+        manager.send_reload_signal()
+    except RuntimeError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
     return {"status": "reloaded"}
 
 

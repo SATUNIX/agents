@@ -2,9 +2,7 @@
 
 from __future__ import annotations
 
-import os
 import signal
-from pathlib import Path
 
 from .config import AgentConfig
 from .context import AgentContext
@@ -25,7 +23,7 @@ class AgentRuntime:
     def __init__(self, run_id: str | None = None) -> None:
         config = AgentConfig.load()
         config.write_snapshot()
-        policy_manager = PolicyManager(Path(os.getenv("AGENT_POLICY_DIR", "policies")))
+        policy_manager = PolicyManager(config.policy_dir)
         state = StateManager(config.state_dir, run_id=run_id, policy_manager=policy_manager)
         llm = LLMClient(config)
         guardrails = Guardrails(config, policy_manager)
@@ -33,7 +31,7 @@ class AgentRuntime:
         tool_registry = ToolRegistry(tool_context)
         tool_registry.write_registry(config.state_dir / "tools" / "registry.json")
         tool_invoker = ToolInvoker(tool_registry, state, policy_manager)
-        mcp_manager = MCPClientManager(config)
+        mcp_manager = MCPClientManager(config, state=state)
         mcp_manager.write_snapshot(config.state_dir / "tools" / "mcp_endpoints.json")
         self.context = AgentContext(
             config=config,
@@ -47,6 +45,7 @@ class AgentRuntime:
         )
         self._orchestrator = AgentOrchestrator(self.context)
         signal.signal(signal.SIGHUP, self._handle_reload)
+        self.context.policies.write_pid()
 
     def run(self, goal: str) -> None:
         self.context.policies.write_pid()

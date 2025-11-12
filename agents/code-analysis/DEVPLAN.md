@@ -208,7 +208,7 @@ Status [ ]
 
 ## Stage 12 – Tool-Backed Execution & Policy Enforcement
 
-**Status:** 🚧 Planned – Bridges the current reasoning-only executor with the filesystem/tooling expectations in SpecSheet/AGENTS.
+**Status:** ✅ Completed – Agents SDK tool-calls now invoke local tools with policy-aware guardrails and structured logging.
 
 **Objectives:**
 
@@ -220,13 +220,13 @@ Status [ ]
 
 * Updated `AgentsGateway` with tool event handling, retry logic, and structured observation logging.
 * Guardrail library that enforces declarative policy rules plus test coverage for accept/reject paths.
-* Regression demo where the executor edits a file using local tools and the reviewer validates the diff.
+* Regression demo (`docs/guides/tool-execution-demo.md`, `scripts/demo_tool_run.py`) showing executor edits and reviewer validation.
 
 ---
 
 ## Stage 13 – Backend Compatibility & Runtime Safety
 
-**Status:** 🚧 Planned – Resolves the LM Studio / Agents SDK mismatch and hard-coded workspace assumptions.
+**Status:** ✅ Completed – Responses/chat detection, retries, path config, and guardrail enhancements shipped with compatibility docs.
 
 **Objectives:**
 
@@ -237,7 +237,7 @@ Status [ ]
 
 **Deliverables:**
 
-* Compatibility matrix + automated smoke test proving both LM Studio chat-only and OpenAI Responses modes succeed.
+* Compatibility matrix (`docs/reports/compatibility-matrix.md`) + `scripts/smoke_test.py` smoke script for both modes.
 * Updated configuration docs/runbooks describing new env flags and local-development path defaults.
 * Guardrail unit tests covering command parsing, network gating, and workspace path validation failures.
 
@@ -245,7 +245,7 @@ Status [ ]
 
 ## Stage 14 – MCP Connectivity & Tool Surfacing
 
-**Status:** 🚧 Planned – Converts the MCP placeholder into a functioning integration tier.
+**Status:** ✅ Completed – MCP manager now performs HTTP/WS/STDIO health checks/invocations with CLI + dashboard visibility.
 
 **Objectives:**
 
@@ -257,13 +257,13 @@ Status [ ]
 
 * `MCPClientManager` capable of connecting, authenticating, and invoking sample endpoints end-to-end.
 * FastAPI dashboard cards plus CLI commands that show MCP health, throttling status, and actionable remediation hints.
-* Integration tests using mocked MCP servers validating connection lifecycle, auth failures, and rate-limit enforcement.
+* Integration tests (HTTP + STDIO) validating connection lifecycle, auth/token handling, and rate-limit enforcement.
 
 ---
 
 ## Stage 15 – Verification, Testing, and QA Alignment
 
-**Status:** 🚧 Planned – Aligns real coverage with the GA claims in docs/reports.
+**Status:** ✅ Completed – Coverage expanded (runtime/MCP/dashboard), CI gains coverage artifacts + nightly smoke chaos workflow, docs refreshed.
 
 **Objectives:**
 
@@ -274,8 +274,8 @@ Status [ ]
 
 **Deliverables:**
 
-* CI pipelines that run unit, integration, and chaos suites with artifacts uploaded for inspection.
-* Coverage reports (e.g., `pytest --cov`) published to README/docs plus alerts if thresholds regress.
+* CI pipelines that run unit, integration, and nightly smoke suites with coverage artifacts uploaded for inspection.
+* Coverage reports (pytest-cov + artifact) and compatibility smoke scripts + docs (`compatibility-matrix`, `smoke_test.py`).
 * Updated reports/runbooks reflecting true QA status, residual risks, and mitigations tied to this stage.
 
 ---
@@ -326,3 +326,257 @@ Status [ ]
 ### Summary
 
 This roadmap represents a full engineering lifecycle from prototype to production readiness, aligning with `SpecSheet.md` and the extended **OpenAI Agents SDK Field Guide**. By completing these stages, the resulting system will be a durable, observable, and extensible autonomous agent platform capable of long-lived reasoning, secure file operations, and continuous development workflows.
+
+Additional Notes: 
+Custom “AgentsGateway”/loop that bypasses SDK tool semantics.
+Make sure your gateway feeds the SDK (Agents/Responses API) and handles tool call events via your ToolInvoker, rather than inventing a parallel tool protocol.
+
+Homemade tool schema/types.
+Keep built-ins to code_interpreter, file_search, and mcp. Everything else should be SDK function tools or Hosted MCP—don’t create a third tool system.
+
+Policy engine that isn’t enforced at runtime.
+Your YAML policies must be enforced inside guardrails that wrap every tool execution, not just appended to system prompts.
+
+MCP as a fully custom client before hosted integration.
+Prefer Hosted MCP tools first; only add an internal MCP client when you truly need it. Otherwise you risk duplicating plumbing.
+Hosted MCP actually live (Stage 14 = planned). Get at least one mature hosted MCP server wired (e.g., GitHub/read-only or Fetch) and visible to the model.
+
+Acceptance tests for tool-calls. Prove end-to-end that the SDK emits tool calls → ToolInvoker runs → outputs are submitted → next step proceeds.
+
+Health probes. One probe to detect Agents/Responses support; another to verify LM Studio readiness; both logged. 
+
+
+
+
+
+New epics: 
+Combine with gap analysis (in progress)
+Epic A — Keep the Gateway SDK-True (no parallel protocol)
+A1. Server capability probe (Agents/Responses vs Chat)
+
+Tasks
+
+Implement _probe_agents_api() that calls the server (e.g., agents.list() or a lightweight endpoint) and caches result.
+
+Add config override FORCE_CHAT_FALLBACK=true for local/dev.
+
+Emit structured event capability_probe to /state/audit/*.jsonl.
+
+Acceptance
+
+On LM Studio, probe logs agents=false, responses=false, chat=true, and gateway falls back to chat without exceptions.
+
+On OpenAI Agents server, probe logs agents=true, responses=true.
+
+A2. Responses/Agents tool-call execution loop
+
+Tasks
+
+In AgentsGateway.run(...), when using Agents/Responses:
+
+Loop: responses.create(...) → if tool calls present → call ToolInvoker → responses.submit_tool_outputs(...) → repeat until status=completed.
+
+Normalize tool call structure (id/name/arguments) into a stable internal DTO.
+
+Support server-side tools (code_interpreter/file_search/mcp) transparently (no local dispatch).
+
+Acceptance
+
+End-to-end demo where SDK emits a function call → local tool runs → output is submitted → next LLM step succeeds → final text returned.
+
+A3. Chat fallback path (read-only)
+
+Tasks
+
+When falling back to chat completions, disable local tools (clearly warn in logs).
+
+Add a “capabilities banner” to the system prompt (read-only mode).
+
+Acceptance
+
+Chat fallback never attempts tool execution; prompts/outputs persist to audit.
+
+Epic B — Tool Taxonomy (no homemade types)
+B1. Restrict built-ins to supported types
+
+Tasks
+
+Enforce: allowed built-ins = {code_interpreter, file_search, mcp}.
+
+Everything else → function tool (schema + handler) or Hosted MCP.
+
+Validate settings.yaml at boot; fail fast on unsupported types.
+
+Acceptance
+
+Invalid type causes a clear startup error with remediation hints.
+
+B2. Function tool schema consistency
+
+Tasks
+
+Single JSON Schema generator for all local tools (Pydantic → JSON Schema).
+
+Tool names normalized (package.module.func → package_module_func).
+
+Acceptance
+
+Schemas appear in agents.create(... tools=[...]); SDK shows identical shapes per run.
+
+Epic C — Policy-as-Code enforced at runtime (not only in prompts)
+C1. Guardrails wrapper for every tool execution
+
+Tasks
+
+Wrap ToolInvoker.invoke(...) with:
+
+Path jail: resolve & confirm under /workspace; deny symlink writes.
+
+Command allowlist + shlex.split + which() validation; per-tool time/memory caps.
+
+Network allowlist driven by policy + ALLOW_NET.
+
+Add redaction filter for logs (tokens/URLs with creds).
+
+Acceptance
+
+Attempts to touch ../ or non-allowed commands fail with GuardrailViolation and are logged.
+
+C2. Declarative policy loader + hot-reload
+
+Tasks
+
+policies/{paths.yaml, tools.yaml, network.yaml} → compiled into a single runtime policy object.
+
+SIGHUP/REST reload to swap policies without restart; emit a policy_reload event.
+
+Acceptance
+
+Changing an allowlist at runtime takes effect for next tool call; audit records the policy version.
+
+Epic D — MCP Integration (prefer Hosted MCP first)
+D1. Hosted MCP enablement
+
+Tasks
+
+Add env/config to register Hosted MCP servers (label, URL, auth).
+
+Pass them to the SDK using HostedMCPTool entries.
+
+Health probe per MCP server (auth/latency/quota), cached & logged.
+
+Acceptance
+
+At least one mature MCP running (e.g., GitHub read-only or Fetch). The model lists & invokes it; health panel shows green.
+
+D2. Internal MCP client (only if needed)
+
+Tasks
+
+Optional later: generic client for HTTP/WS/stdio with schema discovery.
+
+Rate-limit + backoff + circuit-breaker per MCP endpoint.
+
+Acceptance
+
+Disabled by default; when enabled, telemetry shows rate-limit handling and retries.
+
+Epic E — Acceptance Tests for Tool Calls
+E1. Local function tool E2E
+
+Tasks
+
+Test: prompt that forces write_file → assert file created; verify submit_tool_outputs call observed.
+
+Negative: traversal attempt (../../etc/passwd) → assert guardrail denial, no file changed.
+
+Acceptance
+
+Tests pass deterministically; audit contains {tool_call, tool_output, decision} triplets.
+
+E2. Hosted MCP E2E
+
+Tasks
+
+With a hosted Fetch/GitHub MCP:
+
+Prompt to fetch a simple page/repo metadata; assert content summary returned.
+
+Acceptance
+
+MCP result visible in final output; health stats recorded.
+
+Epic F — Health Probes & Readiness
+F1. Backend capability probe
+
+Tasks
+
+/healthz returns JSON:
+
+{ agents_api: bool, responses_api: bool, chat_api: bool, lm_studio_reachable: bool }.
+
+Probe on boot and on interval; write results to /state/audit.
+
+Acceptance
+
+Correct detection on LM Studio vs Agents server; 5xx turns health red.
+
+F2. LM Studio readiness probe
+
+Tasks
+
+Ping OPENAI_BASE_URL with a minimal chat request or a /v1/models list (if supported).
+
+Configurable timeout/backoff; expose last OK timestamp in /healthz.
+
+Acceptance
+
+When LM Studio stops, health flips to red within probe window; resumes when back.
+
+Implementation details to copy-paste
+
+Config flags
+
+FORCE_CHAT_FALLBACK, MCP_REGISTRY_PATH, POLICY_DIR, ALLOW_NET, HEALTH_INTERVAL_S.
+
+Telemetry schema (JSONL)
+
+capability_probe, tool_call, tool_output, guardrail_violation, policy_reload, mcp_health, backend_error, checkpoint_saved.
+
+Error taxonomy
+
+GuardrailViolation, ToolError, BackendUnavailable, PolicyDenied, Timeout, RateLimited.
+
+Concrete deliverables
+
+ gateway/capabilities.py — probe + cached capability map
+
+ gateway/run_agents.py — Responses loop with tool-outputs submission
+
+ tools/invoker.py — wraps guardrails, redaction, timing, truncation
+
+ policies/ + policy_loader.py — compile/hot-reload policies
+
+ mcp/hosted_registry.py — load servers → HostedMCPTool list + health
+
+ health/server.py — tiny FastAPI /healthz + /metrics
+
+ tests/e2e_tool_calls.py — positive & negative local tool flows
+
+ tests/e2e_mcp.py — hosted MCP happy-path test
+
+ docs/guides/tool-execution-demo.md — step-by-step demo
+
+Definition of Done for this expansion
+
+Gateway always prefers SDK Agents/Responses when available; chat path is read-only fallback.
+
+Tool calls from SDK are executed by ToolInvoker with runtime guardrails; outputs are submitted back to the SDK until completion.
+
+Hosted MCP tool(s) are live, discoverable, and visible in the model’s tool list.
+
+Policies are enforced, hot-reloadable, and audited.
+
+Health probes report backend/MCP readiness and flip on failure.
+
+E2E tests prove the loop: SDK tool call → ToolInvoker → submit tool outputs → next step → final answer.

@@ -67,7 +67,39 @@ Both send `SIGHUP` to the main runtime using `/state/agent.pid`.
   - Use `docker exec dev-agent curl <mcp-url>` for reachability.
 - If `ALLOW_NET=false`, network requests are blocked by guardrails—update env var and redeploy if network access is required.
 
-## 5. Log Retention & Archival
+## 5. MCP Health & Invocation
+
+- CLI health check:
+  ```bash
+  python -m agent mcp health
+  ```
+- Invoke hosted tools for testing:
+  ```bash
+  python -m agent mcp invoke http-test summarize --payload '{"path": "README.md"}'
+  ```
+- Dashboard cards (`/mcp` and `/mcp/health`) show live status, latency, and rate-limit incidents.
+  Fields include `throttled` flags and `total_invocations` so operators can spot hot endpoints immediately.
+
+## 8. Log Retention & Archival
 
 - Rotate `/state/audit` and `/state/metrics.json` weekly by copying to long-term storage.
 - Store `/state/release_artifacts` (SBOM, Trivy, Cosign) as part of compliance evidence.
+
+## 6. Environment Flags Snapshot
+
+| Variable | Purpose |
+| --- | --- |
+| `AGENT_POLICY_DIR` | Override location of YAML policy bundle. |
+| `AGENT_ALLOWED_COMMANDS` | Comma-delimited command allowlist; supports multi-word entries (e.g., `git status`). |
+| `AGENT_FORCE_CHAT_COMPLETIONS` | Force chat-completion fallback even if Responses API is available (useful for LM Studio). |
+| `AGENT_CREATE_DIRS` | Set to `false` to prevent auto-creation of workspace/state/tools directories on local hosts. |
+
+## 7. Compatibility Smoke Test
+
+Run the bundled script to ensure both Responses and chat-completion modes function:
+
+```bash
+python scripts/smoke_test.py
+```
+
+CI can execute the script twice—once with default settings and once with `AGENT_FORCE_CHAT_COMPLETIONS=true`—to track regressions across both backends.

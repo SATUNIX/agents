@@ -19,10 +19,10 @@
 
 | Test Type | Status | Notes |
 | --- | --- | --- |
-| Unit (pytest) | ✅ | Config, tools, guardrails, state, checkpoints. |
-| Integration | ⚠️ | Needs deterministic Agents SDK mocks for end-to-end coverage. |
+| Unit (pytest) | ✅ | Config, tools, guardrails, state, checkpoints, runtime, dashboard, MCP clients. |
+| Integration | ✅ | Deterministic Agents SDK and runtime orchestration tests simulate Responses + chat fallback. |
 | E2E (Docker) | ✅ | `docker compose up -d --build` + `python -m agent run` smoke validated. |
-| Chaos/Fault | ⚠️ | Pending automation for LM Studio outage + MCP throttling. |
+| Chaos/Fault | ⚠️ | Nightly workflow executes dual smoke tests; longer outage simulations still pending. |
 
 ## Risks & Mitigations
 
@@ -35,7 +35,7 @@
 - [x] Stage gates 1–9 completed.
 - [x] Documentation and runbooks published under `docs/`.
 - [x] SBOM, Trivy, Cosign outputs archived to `/state/release_artifacts/`.
-- [ ] Automate integration + chaos tests (tracked in gap analysis).
+- [x] Automate integration tests + nightly smoke (chaos) workflow.
 - [ ] Add coverage badge once CI publishes metrics.
 
 Pending checklist items do not block GA but should be addressed in the next milestone.

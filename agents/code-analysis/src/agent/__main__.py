@@ -5,27 +5,29 @@ from __future__ import annotations
 import json
 import os
 from typing import Optional
+from pathlib import Path
 
 import typer
 from rich.console import Console
 
 from .config import AgentConfig
-from pathlib import Path
-
 from .runtime import AgentRuntime
 from .state import StateManager
 from .observability import run_dashboard
 from .policies import PolicyManager
+from .mcp import MCPClientManager
 
 app = typer.Typer(help="Run the OpenAI Agent SDK skeleton loop")
 config_app = typer.Typer(help="Configuration utilities")
 tools_app = typer.Typer(help="Inspect and invoke local tools")
 checkpoints_app = typer.Typer(help="Checkpoint utilities")
 policies_app = typer.Typer(help="Policy-as-code controls")
+mcp_app = typer.Typer(help="Hosted MCP utilities")
 app.add_typer(config_app, name="config")
 app.add_typer(tools_app, name="tools")
 app.add_typer(checkpoints_app, name="checkpoints")
 app.add_typer(policies_app, name="policies")
+app.add_typer(mcp_app, name="mcp")
 
 console = Console()
 
@@ -121,6 +123,26 @@ def policies_reload() -> None:
     manager = PolicyManager(Path(os.getenv("AGENT_POLICY_DIR", "policies")))
     manager.send_reload_signal()
     console.print("[green]Sent SIGHUP to agent runtime[/green]")
+
+
+@mcp_app.command("health")
+def mcp_health() -> None:
+    config = AgentConfig.load()
+    manager = MCPClientManager(config)
+    console.print(manager.health_report())
+
+
+@mcp_app.command("invoke")
+def mcp_invoke(
+    endpoint: str = typer.Argument(..., help="MCP endpoint name"),
+    tool: str = typer.Argument(..., help="Tool exposed by the endpoint"),
+    payload: str = typer.Option("{}", help="JSON payload"),
+) -> None:
+    config = AgentConfig.load()
+    manager = MCPClientManager(config)
+    data = json.loads(payload)
+    result = manager.invoke(endpoint, tool, data)
+    console.print(result)
 
 
 def main() -> None:  # pragma: no cover - Typer entry point

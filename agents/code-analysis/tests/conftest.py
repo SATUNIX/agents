@@ -32,9 +32,19 @@ tools:
   workspace.read_file:
     type: local
     handler: workspace.read_file
+    allowed_globs:
+      - "**/*.md"
+      - "notes.txt"
+    denied_globs:
+      - "secret/**"
   workspace.write_file:
     type: local
     handler: workspace.write_file
+    allowed_globs:
+      - "**/*.md"
+      - "notes.txt"
+    denied_globs:
+      - "secret/**"
 
 policies:
   safety.default:

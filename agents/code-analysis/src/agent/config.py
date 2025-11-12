@@ -85,14 +85,22 @@ class AgentConfig(BaseModel):
     tools_dir: Path
     policy_dir: Path
     allow_net: bool = False
+    create_dirs: bool = True
     settings_path: Path
     settings: SettingsRegistry
     secrets: Dict[str, SecretStr] = Field(default_factory=dict)
 
     @model_validator(mode="after")
     def _ensure_directories(self) -> "AgentConfig":
-        for directory in (self.workspace, self.state_dir, self.tools_dir, self.policy_dir):
-            directory.mkdir(parents=True, exist_ok=True)
+        if self.create_dirs:
+            for directory in (self.workspace, self.state_dir, self.tools_dir, self.policy_dir):
+                directory.mkdir(parents=True, exist_ok=True)
+        else:
+            for directory in (self.workspace, self.state_dir, self.tools_dir):
+                if not directory.exists():
+                    raise FileNotFoundError(
+                        f"Directory {directory} missing and AGENT_CREATE_DIRS=false"
+                    )
         return self
 
     @classmethod
@@ -107,6 +115,7 @@ class AgentConfig(BaseModel):
         settings_path = Path(env.get("AGENT_SETTINGS_PATH", "config/settings.yaml")).expanduser().resolve()
         settings = SettingsRegistry.from_path(settings_path)
         secrets = cls._load_secrets(env.get("AGENT_SECRETS_FILE"))
+        create_dirs = env.get("AGENT_CREATE_DIRS", "true").lower() != "false"
 
         return cls(
             openai_base_url=env.get("OPENAI_BASE_URL", "http://host.docker.internal:1234/v1"),
@@ -116,6 +125,7 @@ class AgentConfig(BaseModel):
             state_dir=state_dir,
             tools_dir=tools_dir,
             policy_dir=policy_dir,
+            create_dirs=create_dirs,
             allow_net=env.get("ALLOW_NET", "false").lower() == "true",
             settings_path=settings_path,
             settings=settings,
@@ -180,6 +190,7 @@ class AgentConfig(BaseModel):
             "state_dir": str(self.state_dir),
             "tools_dir": str(self.tools_dir),
             "policy_dir": str(self.policy_dir),
+            "create_dirs": self.create_dirs,
             "allow_net": self.allow_net,
             "settings_path": str(self.settings_path),
             "settings": self.settings.model_dump(),

@@ -8,6 +8,8 @@ from typing import List, Dict, Any
 from ..config import AgentConfig
 from ..sdk import AgentsGateway
 from ..state import StateManager
+from ..policies import PolicyViolation
+from ..tools.base import ToolError
 
 
 @dataclass
@@ -54,7 +56,12 @@ class BaseSDKAgent:
             "agent_prompt",
             {"role": self.role_name, "prompt": prompt},
         )
-        response = self.gateway.run(self.role_name, prompt)
+        try:
+            response = self.gateway.run(self.role_name, prompt)
+        except PolicyViolation as exc:
+            response = f"Policy violation: {exc}"
+        except ToolError as exc:
+            response = f"Tool error: {exc}"
         self.state.append_event(
             "agent_response",
             {"role": self.role_name, "response": response},
